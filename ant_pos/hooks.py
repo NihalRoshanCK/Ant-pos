@@ -213,3 +213,5 @@ app_license = "MIT"
 # auth_hooks = [
 # 	"ant_pos.auth.validate"
 # ]
+
+website_route_rules = [{'from_route': '/AntPos/<path:app_path>', 'to_route': 'AntPos'},]
