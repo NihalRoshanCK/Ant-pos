@@ -1,6 +1,6 @@
 import './index.css'
 
-import { createApp } from 'vue'
+import { createApp, reactive } from 'vue'
 import router from './router'
 import App from './App.vue'
 
@@ -13,7 +13,7 @@ import {
   resourcesPlugin,
 } from 'frappe-ui'
 
-let app = createApp(App)
+const app = createApp(App)
 
 setConfig('resourceFetcher', frappeRequest)
 
@@ -23,5 +23,9 @@ app.use(resourcesPlugin)
 app.component('Button', Button)
 app.component('Card', Card)
 app.component('Input', Input)
+
+// Create a reactive base object and provide it
+const base = reactive({})
+app.provide('base', base) // 'base' is the key for injection
 
 app.mount('#app')

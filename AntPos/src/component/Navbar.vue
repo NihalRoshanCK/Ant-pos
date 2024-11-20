@@ -10,11 +10,35 @@
         </div>
         <div class="flex gap-4">
             <div>
-                pos profile
+                {{base?.Ant_Opening_Shift?.pos_profile}}
             </div>
-            <div>
-                Menu
-            </div>
+                <Dropdown
+                    :options="[
+                        {
+                        label: 'Close Shift',
+                        onClick: () => {
+                                    },
+                        icon: () => h(FeatherIcon, { name: 'file-minus' }),
+                        },
+                        {
+                        label: 'Logout',
+                        onClick: () => {
+                                    },
+                        icon: () => h(FeatherIcon, { name: 'log-out' }),
+                        },
+                    ]"
+                    :button="{
+                        label: 'Menu',
+                    }"
+                />
         </div>
     </div>
 </template>
+
+<script setup>
+    import { h , inject } from 'vue'; 
+
+    const base = inject('base')
+
+    import { Dropdown , FeatherIcon } from 'frappe-ui'
+</script>
