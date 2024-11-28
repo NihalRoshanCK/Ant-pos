@@ -1,64 +1,62 @@
 <template>
   <div>
     <router-view />
-    <Dialog v-model="dialog1">
+    <Dialog v-model="dialog1" @click="closeDialog">
       <template #body-title>
         <h3>Create ANT Opening Shift</h3>
       </template>
       <template #body-content>
         <div class="flex flex-col gap-8">
-          <div class="">
-            <FormControl
-              type="autocomplete"
-              :options="[
-                {
-                  label: 'One',
-                  value: '1',
-                },
-                {
-                  label: 'Two',
-                  value: '2',
-                },
-                {
-                  label: 'Three',
-                  value: '3',
-                },
-              ]"
-              size="sm"
-              variant="subtle"
-              placeholder="Placeholder"
-              :disabled="false"
-              label="Company"
-              v-model="autocompleteValue"
-              hide-search="true"
-            />
-          </div>
-          <div>
-            <FormControl
-              type="autocomplete"
-              :options="[
-                {
-                  label: 'One',
-                  value: '1',
-                },
-                {
-                  label: 'Two',
-                  value: '2',
-                },
-                {
-                  label: 'Three',
-                  value: '3',
-                },
-              ]"
-              size="sm"
-              variant="subtle"
-              placeholder="Placeholder"
-              :disabled="false"
-              label="Company"
-              v-model="autocompleteValue"
-              hide-search="true"
-            />
+          <!-- Company Selection -->
+          <FormControl
+            type="autocomplete"
+            :options="options.company.map(company => ({ label: company, value: company }))"
+            size="sm"
+            variant="subtle"
+            placeholder="Select Company"
+            label="Company"
+            v-model="autocompleteValue"
+            hide-search="true"
+          />
 
+          <!-- POS Profile Selection -->
+          <FormControl
+            type="autocomplete"
+            :options="getProfileOptions()"
+            size="sm"
+            variant="subtle"
+            placeholder="Select POS Profile"
+            :disabled="!autocompleteValue"
+            label="POS Profile"
+            v-model="autocompleteProfileValue"
+            hide-search="true"
+          />
+
+          <!-- Mode of Payment -->
+          <div v-if="mode_of_payment.length">
+            <div class="border-2">
+              <div class="p-2 flex justify-between">
+                <div class="text-center">Mode Of Payment</div>
+                Opening Amount
+              </div>
+              <div
+                class="flex justify-between p-2 border-t-2"
+                v-for="mode in mode_of_payment"
+                :key="mode"
+              >
+                <div class="w-1/2">{{ mode }}</div>
+                <div class="">
+                  <FormControl
+                    type="number"
+                    size="sm"
+                    variant="subtle"
+                    placeholder="Opening Amount"
+                    :name="mode"
+                    v-model="openingAmounts[mode]" 
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </template>
@@ -70,34 +68,79 @@
   </div>
 </template>
 
+
 <script setup>
-import { createResource, Button, Dialog, Autocomplete,FormControl  } from 'frappe-ui';
-import { inject, ref } from 'vue';
-const single= ref('')
-const dialog1 = ref(false); // Reactive variable for dialog state
+import { createResource, Button, Dialog, FormControl } from 'frappe-ui';
+import { inject, ref, watch, reactive } from 'vue';
+
+const options = reactive({
+  company: [],
+  profile: {},
+});
+
+const dialog1 = ref(false);
+const autocompleteValue = ref({});
+const autocompleteProfileValue = ref({});
+const mode_of_payment = ref([]);
+const openingAmounts = reactive({}); // To track opening amounts for each mode of payment
+
 const base = inject('base');
 
-// Function to close the dialog
 const closeDialog = () => {
-  dialog1.value = false; // Update reactive property
+  openDialog()
 };
 
-// Function to handle confirmation action
 const confirmShift = () => {
-  console.log('Opening shift confirmed.');
-  closeDialog(); // Close the dialog after confirmation
+  // Gather all data on submission
+  const submissionData = {
+    company: autocompleteValue.value.value || null,
+    pos_profile: autocompleteProfileValue.value.value || null,
+    mode_of_payment: mode_of_payment.value.map((mode) => ({
+      mode,
+      opening_amount: openingAmounts[mode] || 0,
+    })),
+  };
+
+  console.log('Submitted Data:', submissionData);
+
+  // TODO: Send the `submissionData` to the server or handle it as needed
+  closeDialog();
 };
 
-// Create a resource to fetch data
-let post = createResource({
-  url: 'ant_pos.ant_pos.api.pos-profile.get_openingshift',
-  method: 'GET',
-  auto: true,
-  onSuccess(data) {
-    if (!data || !data.Ant_Opening_Shift) {
-      dialog1.value = true; // Show dialog if no opening shift data
-    }
-    Object.assign(base, data); // Merge fetched data into `base`
-  },
+const getModeOfPayment = () => {
+  if (getProfileOptions()) {
+    const profiles = options.profile[autocompleteValue.value.value];
+    const profile = profiles.find((p) => p.name === autocompleteProfileValue.value.value);
+    return profile ? profile.modes_of_payment : [];
+  }
+  return [];
+};
+
+const getProfileOptions = () => {
+  const profile = options.profile[autocompleteValue.value.value];
+  return profile ? profile.map((item) => item.name) : [];
+};
+
+const openDialog = () => {
+  const posprofile = createResource({
+    url: 'ant_pos.ant_pos.api.pos-profile.get_pos_profiles_by_company',
+    method: 'GET',
+
+    onSuccess(data) {
+      if (data && typeof data === 'object') {
+        options.company = Object.keys(data);
+        options.profile = data;
+      }
+    },
+  });
+  posprofile.fetch();
+  dialog1.value = true;
+};
+openDialog()
+
+watch(autocompleteProfileValue, (newVal, oldVal) => {
+  if (newVal.value !== oldVal.value) {
+    mode_of_payment.value = getModeOfPayment();
+  }
 });
 </script>
