@@ -84,28 +84,46 @@ const autocompleteProfileValue = ref({});
 const mode_of_payment = ref([]);
 const openingAmounts = reactive({}); // To track opening amounts for each mode of payment
 
-const base = inject('base');
+let base = inject('base');
 
 const closeDialog = () => {
-  openDialog()
+  validate_pos.fetch()
 };
-
-const confirmShift = () => {
-  // Gather all data on submission
+const submit = createResource({
+    url: 'ant_pos.ant_pos.api.pos_profile.create_opening',
+    method: 'POST',
+    
+    onSuccess(data) {
+      
+      
+    },
+  });
+  const confirmShift = async () => {
+  loading.value = true;
+  errorMessage.value = '';
+  
   const submissionData = {
     company: autocompleteValue.value.value || null,
     pos_profile: autocompleteProfileValue.value.value || null,
-    mode_of_payment: mode_of_payment.value.map((mode) => ({
-      mode,
+    status: 'Open',
+    opening_balance_details: mode_of_payment.value.map((mode) => ({
+      mode_of_payment: mode,
       opening_amount: openingAmounts[mode] || 0,
     })),
   };
 
-  console.log('Submitted Data:', submissionData);
-
-  // TODO: Send the `submissionData` to the server or handle it as needed
-  closeDialog();
+  try {
+    await submit.submit({ values: submissionData });
+    console.log('Submitted Data:', submissionData);
+    closeDialog();
+  } catch (error) {
+    errorMessage.value = 'Failed to submit data. Please try again.';
+    console.error('Submission Error:', error);
+  } finally {
+    loading.value = false;
+  }
 };
+
 
 const getModeOfPayment = () => {
   if (getProfileOptions()) {
@@ -123,7 +141,7 @@ const getProfileOptions = () => {
 
 const openDialog = () => {
   const posprofile = createResource({
-    url: 'ant_pos.ant_pos.api.pos-profile.get_pos_profiles_by_company',
+    url: 'ant_pos.ant_pos.api.pos_profile.get_pos_profiles_by_company',
     method: 'GET',
 
     onSuccess(data) {
@@ -136,8 +154,20 @@ const openDialog = () => {
   posprofile.fetch();
   dialog1.value = true;
 };
-openDialog()
+const validate_pos = createResource({
+    url: 'ant_pos.ant_pos.api.pos_profile.get_openingshift',
+    method: 'GET',
+    auto:true,
 
+    onSuccess(data) {
+      if (data){
+        Object.assign(base, data); 
+        dialog1.value=false;
+      }else{
+        openDialog()
+      }
+    },
+  });
 watch(autocompleteProfileValue, (newVal, oldVal) => {
   if (newVal.value !== oldVal.value) {
     mode_of_payment.value = getModeOfPayment();

@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-
+from ant_pos.ant_pos.doctype.ant_opening_shift.ant_opening_shift import AntOpeningShift
 
 @frappe.whitelist()
 def get_openingshift():
@@ -66,3 +66,43 @@ def get_pos_profiles_by_company():
     print("Company Profiles Data with Modes of Payment:", company_profiles)
 
     return company_profiles
+
+
+@frappe.whitelist()
+def create_opening(values):
+    """
+    Creates a new Ant Opening Shift document with the given values.
+
+    Args:
+        values (dict): A dictionary containing the field names and their respective values.
+
+    Returns:
+        str: The name of the newly created Ant Opening Shift document.
+    """
+    try:
+        # Validate input
+        if not isinstance(values, dict):
+            frappe.throw("Invalid data format. Expected a dictionary.")
+
+        # Create a new Ant Opening Shift document
+        ant_opening_shift = frappe.new_doc("Ant Opening Shift")
+        
+        # Set field values from the `values` dictionary
+        for field, value in values.items():
+            ant_opening_shift.set(field, value)
+
+        # Insert the document into the database
+        ant_opening_shift.insert()
+
+        ant_opening_shift.submit()
+
+        # Optionally, submit the document if it requires workflow completion
+        # ant_opening_shift.submit()
+
+        # Return the name of the new document
+        return ant_opening_shift.name
+
+    except Exception as e:
+        frappe.log_error(message=frappe.get_traceback(), title="Ant Opening Shift Creation Error")
+        frappe.throw(str(e))
+

@@ -48,6 +48,7 @@
   },
   {
    "allow_on_submit": 1,
+   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
@@ -92,7 +93,8 @@
    "fieldname": "opening_balance_details",
    "fieldtype": "Table",
    "label": "Opening Balance Details",
-   "options": "Ant Opening Shift Detail"
+   "options": "Ant Opening Shift Detail",
+   "reqd": 1
   },
   {
    "allow_on_submit": 1,
@@ -105,7 +107,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2024-11-19 12:57:45.953679",
+ "modified": "2024-11-29 18:05:22.683131",
  "modified_by": "Administrator",
  "module": "Ant-Pos",
  "name": "Ant Opening Shift",
