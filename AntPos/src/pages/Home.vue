@@ -1,7 +1,7 @@
 <template>
   <div class="w-screen h-screen">
     <div class="w-screen h-[6%]">
-      <Navbar/>
+      <Navbar />
     </div>
     <div class="w-screen h-[94%] flex">
       <div class="w-1/2 ">
@@ -22,13 +22,72 @@
         </div>
       </div>
       <div class="w-1/2">
-
+        <div>
+          <div class="p-2">
+            <Autocomplete
+              :options="computedOptions"
+              v-model="single"
+              placeholder="Select person"
+              @update:modelValue="handleCustomer"
+            >
+            </Autocomplete>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import Navbar from '../component/Navbar.vue'
-import {FormControl ,FeatherIcon} from 'frappe-ui'
+import Navbar from '../component/Navbar.vue';
+import { FormControl, FeatherIcon, Autocomplete, createListResource } from 'frappe-ui';
+import { computed, inject, ref } from 'vue';
+
+// Injecting the 'base' object
+let base = inject('base');
+
+// Create the resource
+let customer = createListResource({
+  doctype: 'Customer',
+  fields: ['name', 'mobile_no'],
+  filters: {
+    disabled: false,
+  },
+  pageLength: Number.MAX_VALUE * 2,
+  auto: true,
+  transform: (data) => {
+    return data.map((item) => ({
+      label: item.name,
+      value: item.name,
+      mobile_no: item.mobile_no,
+    }));
+  },
+});
+
+const handleCustomer = (selected) => {
+  console.log("Selected customer:", selected);
+
+  // Set the selected customer in the base object
+  if (base) {
+    base.customer = selected.value;
+    console.log("Customer set in base:", base.customer);
+  } else {
+    console.error("Base is not defined!");
+  }
+  console.log(base,"kkkkkkk");
+  
+};
+
+const computedOptions = computed(() => {
+  return customer?.data
+    ? customer.data.map((option) => ({
+        number: option.mobile_no || 'N/A',
+        label: option.label || 'Unnamed',
+        value: option.value,
+      }))
+    : [];
+});
+
+const single = ref('');
 </script>
+
