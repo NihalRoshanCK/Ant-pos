@@ -23,28 +23,53 @@
       </div>
       <div class="w-1/2">
         <div>
-          <div class="p-2">
-            <Autocomplete
-              :options="computedOptions"
-              v-model="single"
-              placeholder="Select person"
-              @update:modelValue="handleCustomer"
-            >
-            </Autocomplete>
-          </div>
+<div class="p-2">
+  <!-- Container for Autocomplete and Plus Icon -->
+  <div class="flex items-center space-x-2">
+    <!-- Autocomplete Component -->
+    <Autocomplete
+      :options="computedOptions"
+      v-model="single"
+      placeholder="Select person"
+      @update:modelValue="handleCustomer"
+      class="flex-grow"
+    />
+    
+    <!-- Feather Icon with Plus on the Right -->
+    <FeatherIcon
+      class="w-4 cursor-pointer"
+      name="plus"
+      @click="openCustomerForm"
+    />
+  </div>
+</div>
+
+
+          
         </div>
       </div>
     </div>
+    <CustomerForm v-if="showCustomerForm" @close="closeCustomerForm"  />
   </div>
 </template>
 
 <script setup>
 import Navbar from '../component/Navbar.vue';
-import { FormControl, FeatherIcon, Autocomplete, createListResource } from 'frappe-ui';
+import CustomerForm from '../component/Dialog/CustomerForm.vue'
+import { FormControl, FeatherIcon, Autocomplete, createListResource ,Button } from 'frappe-ui';
 import { computed, inject, ref } from 'vue';
 
 // Injecting the 'base' object
 let base = inject('base');
+
+const showCustomerForm = ref(false);
+const openCustomerForm = () => {
+  showCustomerForm.value = true;
+};
+const closeCustomerForm = () => {
+  showCustomerForm.value = false;
+};
+
 
 // Create the resource
 let customer = createListResource({
