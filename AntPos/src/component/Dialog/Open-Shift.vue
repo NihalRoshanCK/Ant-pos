@@ -1,5 +1,5 @@
 <template>
-    <Dialog v-model="dialog1" @click="closeDialog">
+    <Dialog v-model="dialog1"  @close="closeDialog">
       <template #body-title>
         <h3>Create ANT Opening Shift</h3>
       </template>

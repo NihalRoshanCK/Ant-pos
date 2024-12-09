@@ -1,11 +1,11 @@
 <template>
-    <Dialog :show="dialogVisible" @update:show="handleDialogClose">
+    <Dialog  :options="{ size: '2xl' }" v-model ="dialogVisible" @close="handleDialogClose">
       <template #body-title>
         <h3>Create Customer</h3>
       </template>
   
       <template #body-content>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-2 gap-5 w-full place-items-stretch">
           <!-- Customer Name -->
           <FormControl
             type="text"
@@ -134,8 +134,6 @@
   // Function to close the dialog
   const handleDialogClose = () => {
     dialogVisible.value = false;
-    // Emit close event to parent
-    $emit('close');
   };
   
   // Function to handle customer submission

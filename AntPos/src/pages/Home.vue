@@ -31,7 +31,7 @@
               <div class="w-11/12">
                 <Autocomplete
                 :options="computedOptions"
-                v-model="single"
+                v-model="selected_customer"
                 placeholder="Select person"
                 @update:modelValue="handleCustomer"
                 />
@@ -67,7 +67,7 @@
 <script setup>
   import Navbar from '../component/Navbar.vue';
   import { FormControl, FeatherIcon, Autocomplete, createListResource ,Button } from 'frappe-ui';
-  import { computed, inject, ref  } from 'vue';
+  import { computed, inject, ref , watch } from 'vue';
   import { useDynamicComponent } from '../utils/Dialog';
 
   let base = inject('base');
@@ -76,7 +76,8 @@
   if (!base.Ant_Opening_Shift.name) {
     loadComponent('OpenShift');
   }
-
+  const selected_customer = ref('');
+  
   let customer = createListResource({
     doctype: 'Customer',
     fields: ['name', 'mobile_no'],
@@ -104,6 +105,13 @@
       : [];
   });
 
-const single = ref('');
+  watch(
+    selected_customer, (newValue, oldValue) => {
+      if (newValue.value!=oldValue.value){
+        base.customer=newValue.value
+      }
+    }
+  )
+
 </script>
 
