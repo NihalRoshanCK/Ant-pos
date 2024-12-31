@@ -1,5 +1,5 @@
 <template>
-    <Dialog  :options="{ size: '2xl' }" v-model ="dialogVisible" @close="handleDialogClose">
+    <Dialog  :options="{ size: '2xl' }" v-model="dialogVisible" @close="handleDialogClose" @after-leave="handleDialogClose">
       <template #body-title>
         <h3>Create Customer</h3>
       </template>
@@ -83,7 +83,8 @@
   // Reactive state for dialog visibility
   const dialogVisible = ref(true);
   const base = inject('base');
-  console.log(base.pos_profile.company,"basee")
+  
+  const { currentComponent, loadComponent } = inject('dynamicComponent');
   
   // Customer object
   const customer = ref({
@@ -139,13 +140,12 @@
   // Function to handle customer submission
   const createCustomer = () => {
     const customerData = {
-    ...customer.value, // Copy the original fields
-    gender: customer.value.gender ? customer.value.gender.value : null, // Extract only the 'value' part
-    group: customer.value.group ? customer.value.group.value : null, // Extract only the 'value' part
-    territory: customer.value.territory ? customer.value.territory.value : null // Extract only the 'value' part
+    ...customer.value,
+    gender: customer.value.gender ? customer.value.gender.value : null,
+    group: customer.value.group ? customer.value.group.value : null,
+    territory: customer.value.territory ? customer.value.territory.value : null
   };
     
-  console.log(customerData,"customerDatacustomerData")
     createResource({
       method: 'POST',
       url: '/api/resource/Customer',

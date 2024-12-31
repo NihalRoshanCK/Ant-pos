@@ -156,7 +156,7 @@
 
         onSuccess(data) {
         if (data){
-            Object.assign(base, data); 
+            Object.assign(base, data);         
             dialog1.value=false;
         }else{
             openDialog()

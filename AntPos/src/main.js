@@ -27,6 +27,7 @@ app.component('Input', Input)
 // Create a reactive base object and provide it
 const base = reactive({
   Ant_Opening_Shift:{},
+  items:[]
 })
 app.provide('base', base) // 'base' is the key for injection
 

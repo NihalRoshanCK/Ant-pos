@@ -11,6 +11,12 @@ export function useDynamicComponent() {
             };
 
             if (components[componentName]) {
+                // Reset the current component to null before loading
+                currentComponent.value = null;
+
+                // Small delay to ensure Vue notices the change
+                await new Promise((resolve) => setTimeout(resolve, 0));
+
                 const component = await components[componentName]();
                 currentComponent.value = component.default;
             } else {
