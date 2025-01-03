@@ -111,41 +111,55 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 @frappe.whitelist()
 def items(pos_profile, search_value, customer):
 	if not customer:
-		frappe.throw(
-					_("please select the customer ")
-					)
-	print(customer, "customer$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-	# frappe.throw(
-	# 			_("please select the customer ").format(frappe.bold(""))
-	# 			)
+		frappe.throw(_("Please select the customer"))
+
 	value = scan_barcode(search_value)
+	if not value or not value.get("item"):
+		frappe.throw(_("No item found for the given barcode."))
+
 	pos_profile_data = frappe._dict(json.loads(pos_profile))
-	# pos_profile_data = frappe.get_doc('POS Profile', pos_profile) if pos_profile else None
-	print(pos_profile_data, "pos_profile@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
-	company = frappe.db.get_value('Company',pos_profile_data.get('company'), ['*'], as_dict=1)
-	customer_doc = frappe.db.get_value('Customer',customer, ['*'], as_dict=1)
-	uom_conversion = frappe.db.get_value('UOM Conversion Detail', value.item.uoms, ['*'], as_dict=1)
-	item_price = frappe.db.get_value('Item Price', {'item_code': value.item.item_code, 'price_list': 'Standard Selling',"batch_no":value.batch_no}, ['*'], as_dict=1)
-	print(item_price, "item_price************************************")
-	item = value.item
-	if item:
-		items={
-    		"item_code":item.item_code,
-    		"barcode":value.barcode,
-    		"customer":customer,
-    		"currency":company.get('default_currency'),
-    		"is_internal_customer":customer_doc.get('is_internal_customer'),
-			"price_list":"Standard Selling",
-			"price_list_currency":company.get('default_currency'),
-			"company":company.get('name'),
-			"ignore_pricing_rule":0,
-			"doctype":"Sales Invoice",
-			"stock_uom":item.get('stock_uom'),
-			"pos_profile":pos_profile_data.get('name'),
-			"cost_center":pos_profile_data.get('cost_center'),
-			"tax_category":pos_profile_data.get('tax_category'),
-		}
-		rule = get_item_details(items, doc=None,overwrite_warehouse=False,)
-		return rule
+	company = frappe.db.get_value('Company', pos_profile_data.get('company'), ['default_currency', 'name'], as_dict=True)
+	customer_doc = frappe.db.get_value('Customer', customer, ['is_internal_customer'], as_dict=True)
+	item = value["item"]
+
+	serial_nos = []
+	batch_nos = []
+
+	if item.get("has_serial_no"):
+		serial_filters = {"item_code": item["item_code"], "warehouse": pos_profile_data.get('warehouse')}
+		if item.get("has_batch_no"):
+			serial_filters["batch_no"] = value.get("batch_no")
+		serial_nos = frappe.get_all("Serial No", filters=serial_filters, fields=["name as serial_no", "batch_no"])
+
+	if item.get("has_batch_no"):
+		batch_nos = frappe.get_all("Batch", filters={"item": item["item_code"]}, fields=["name as batch_no", "expiry_date"])
+	rate=150
+	items = {
+		"item_code": item["item_code"],
+		"barcode": value.get("barcode"),
+		"customer": customer,
+		"currency": company.get('default_currency'),
+		"is_internal_customer": customer_doc.get('is_internal_customer'),
+		"price_list": "Standard Selling",
+		"price_list_currency": company.get('default_currency'),
+		"company": company.get('name'),
+		"ignore_pricing_rule": 0,
+		"doctype": "Sales Invoice",
+		"stock_uom": item.get('stock_uom'),
+		"pos_profile": pos_profile_data.get('name'),
+		"cost_center": pos_profile_data.get('cost_center'),
+		"tax_category": pos_profile_data.get('tax_category'),
+		"serial_no": serial_nos,
+		"rate": rate,
+		"batch_no": value.get("batch_no"),
+		"warehouse": pos_profile_data.get('warehouse')
+	}
+	values = get_item_details(items, doc=None, overwrite_warehouse=False)
+	values["rate"]=rate
+	values["serial_no"]=serial_nos
+	values["batch_nos"]=batch_nos
+	values["selected_serial_no"]=[value.get("serial_no")] if value.get("has_serial_no") else None
+	values["selected_batch_no"]=item.get("batch_no") if value.get("has_batch_no") and not value.get("has_serial_no")  else None
+	return values 
 
 

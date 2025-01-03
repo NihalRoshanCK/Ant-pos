@@ -62,11 +62,11 @@
                 };
             },
             onSuccess(data) {
-                // console.log(data, 'Search results');
-                // items.value = data || [];
-                // console.log('Updated items:', items.value);
-                base.items.push(data)
+
+                base.items.push(data);
                 debounceSearch.value = '';
+                console.log(base.items,"base itemsddddddddddddddddddddddddd");
+                
             },
             onError(error) {
                 console.error('Search error:', error);
@@ -75,8 +75,43 @@
         });
 
     }
+    const generateKey = (item) => {
+        return `${item.item_code}`;
+    };
     
+    // Functions to manipulate the hash map
+const addItem = (item) => {
+    const key = generateKey(item);
+    if (!base.items[key]) {
+        base.items[key] = item;
+    } else {
+        console.log(`Item with key "${key}" already exists.`);
+    }
+};
 
+const editItem = (item) => {
+    const key = generateKey(item);
+    if (base.items[key]) {
+        base.items[key] = item;
+    } else {
+        console.error(`Item with key "${key}" not found.`);
+    }
+};
+
+const deleteItem = (item) => {
+    const key = generateKey(item);
+    if (base.items[key]) {
+        delete base.items[key];
+    } else {
+        console.error(`Item with key "${key}" not found.`);
+    }
+};
+
+// Utility function to get an item by key
+const getItem = (item) => {
+    const key = generateKey(item);
+    return base.items[key] || null;
+}
     watch(debounceSearch, (newVal) => {
         console.log('Debounce search value:', newVal);
         if (newVal) {
