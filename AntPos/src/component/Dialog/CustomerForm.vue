@@ -139,16 +139,19 @@
   
   // Function to handle customer submission
   const createCustomer = () => {
+    // console.log('Creating Customer:', customer.value);
+    
     const customerData = {
-    ...customer.value,
-    gender: customer.value.gender ? customer.value.gender.value : null,
-    group: customer.value.group ? customer.value.group.value : null,
-    territory: customer.value.territory ? customer.value.territory.value : null
-  };
+  ...customer.value,
+  gender: customer.value.gender?.value ?? null,
+  group: customer.value.group?.value ?? null,
+  territory: customer.value.territory?.value ?? null
+};
     
     createResource({
       method: 'POST',
       url: '/api/resource/Customer',
+      auto: true,
       makeParams() {
         return {
           data: customerData, // Pass customer data directly

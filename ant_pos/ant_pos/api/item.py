@@ -1,8 +1,8 @@
 import frappe
 import json
 from frappe import _ 
-# from erpnext.accounts.doctype.pricing_rule.pricing_rule import  apply_pricing_rule,get_pricing_rule_for_item
-from erpnext.stock.get_item_details import get_item_details
+from erpnext.stock.get_item_details import get_item_details , get_item_price
+from erpnext.stock.doctype.batch.batch import get_batch_qty
 BarcodeScanResult = dict[str, str | None]
 
 def _update_item_info(scan_result: dict[str, str | None]) -> dict[str, str | None]:
@@ -77,89 +77,78 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 	return {}
 
 
-# @frappe.whitelist()
-# def items(pos_profile,search_value,customer ):
-#     """
-#     Fetch item details, including serial numbers if applicable.
-#     """
-#     value = scan_barcode(search_value)
-#     if not value or not value.item:
-#         frappe.throw(("No item found for the given barcode."))
-# 	item = value.item
-# 		if item:
 
-	# if item.has_serial_no:
-	# 	serial_nos = frappe.get_all(
-	# 	"Serial No",
-	# 	filters={"item_code": item.item_code, "warehouse": pos_profile.warehouse},
-	# 	fields=["name as serial_no", "batch_no"],
-	# 	)
-	# 	value["serial_nos"] = serial_nos
-	# if item.has_batch_no:
-	# 	batch_nos = frappe.get_all(
-	# 		"Batch",
-	# 	filters={"item": item.item_code},
-	# 	fields=["name as batch_no", "expiry_date"],
-	# 	)
-	# 	value["batch_nos"] = batch_nos
-# from frappe.utils import cstr, comma_and, cint
-# frappe.throw(
-# 				_("Rows {0} have the duplicate questions.").format(frappe.bold(comma_and(rows)))
-# 			)
-
-    
 @frappe.whitelist()
 def items(pos_profile, search_value, customer):
-	if not customer:
-		frappe.throw(_("Please select the customer"))
+    if not customer:
+        frappe.throw(_("Please select the customer"))
 
-	value = scan_barcode(search_value)
-	if not value or not value.get("item"):
-		frappe.throw(_("No item found for the given barcode."))
+    value = scan_barcode(search_value)
+    if not value or not value.get("item"):
+        frappe.throw(_("No item found for the given barcode."))
 
-	pos_profile_data = frappe._dict(json.loads(pos_profile))
-	company = frappe.db.get_value('Company', pos_profile_data.get('company'), ['default_currency', 'name'], as_dict=True)
-	customer_doc = frappe.db.get_value('Customer', customer, ['is_internal_customer'], as_dict=True)
-	item = value["item"]
+    pos_profile_data = frappe._dict(json.loads(pos_profile))
+    company = frappe.db.get_value('Company', pos_profile_data.get('company'), ['default_currency', 'name'], as_dict=True)
+    customer_doc = frappe.db.get_value('Customer', customer, ['is_internal_customer'], as_dict=True)
+    item = value["item"]
 
-	serial_nos = []
-	batch_nos = []
+    serial_nos = []
+    batch_nos = []
 
-	if item.get("has_serial_no"):
-		serial_filters = {"item_code": item["item_code"], "warehouse": pos_profile_data.get('warehouse')}
-		if item.get("has_batch_no"):
-			serial_filters["batch_no"] = value.get("batch_no")
-		serial_nos = frappe.get_all("Serial No", filters=serial_filters, fields=["name as serial_no", "batch_no"])
+    if item.get("has_serial_no"):
+        serial_filters = {"item_code": item["item_code"], "warehouse": pos_profile_data.get('warehouse')}
+        serial_nos = frappe.get_all("Serial No", filters=serial_filters, fields=["name as serial_no", "batch_no"])
 
-	if item.get("has_batch_no"):
-		batch_nos = frappe.get_all("Batch", filters={"item": item["item_code"]}, fields=["name as batch_no", "expiry_date"])
-	rate=150
-	items = {
-		"item_code": item["item_code"],
-		"barcode": value.get("barcode"),
-		"customer": customer,
-		"currency": company.get('default_currency'),
-		"is_internal_customer": customer_doc.get('is_internal_customer'),
-		"price_list": "Standard Selling",
-		"price_list_currency": company.get('default_currency'),
-		"company": company.get('name'),
-		"ignore_pricing_rule": 0,
-		"doctype": "Sales Invoice",
-		"stock_uom": item.get('stock_uom'),
-		"pos_profile": pos_profile_data.get('name'),
-		"cost_center": pos_profile_data.get('cost_center'),
-		"tax_category": pos_profile_data.get('tax_category'),
-		"serial_no": serial_nos,
-		"rate": rate,
-		"batch_no": value.get("batch_no"),
-		"warehouse": pos_profile_data.get('warehouse')
-	}
-	values = get_item_details(items, doc=None, overwrite_warehouse=False)
-	values["rate"]=rate
-	values["serial_no"]=serial_nos
-	values["batch_nos"]=batch_nos
-	values["selected_serial_no"]=[value.get("serial_no")] if value.get("has_serial_no") else None
-	values["selected_batch_no"]=item.get("batch_no") if value.get("has_batch_no") and not value.get("has_serial_no")  else None
-	return values 
+    if item.get("has_batch_no"):
+        batch_nos = frappe.get_all("Batch", filters={"item": item["item_code"]}, fields=["name as batch_no", "expiry_date"])
 
+    rate = 150
+    items = {
+        "item_code": item["item_code"],
+        "barcode": value.get("barcode"),
+        "customer": customer,
+        "currency": company.get('default_currency'),
+        "is_internal_customer": customer_doc.get('is_internal_customer'),
+        "price_list": "Standard Selling",
+        "price_list_currency": company.get('default_currency'),
+        "company": company.get('name'),
+        "ignore_pricing_rule": 0,
+        "doctype": "Sales Invoice",
+        "stock_uom": item.get('stock_uom'),
+        "pos_profile": pos_profile_data.get('name'),
+        "cost_center": pos_profile_data.get('cost_center'),
+        "tax_category": pos_profile_data.get('tax_category'),
+        "serial_no": serial_nos,
+        "rate": rate,
+        "batch_no": value.get("batch_no"),
+        "warehouse": pos_profile_data.get('warehouse')
+    }
 
+    # Fetch item details
+    values = get_item_details(items, doc=None, overwrite_warehouse=False)
+    
+    test=get_item_price(items,item.item_code)
+    print(test,item.item_code,"********************************8")
+    # Fetch discount details from pricing rule
+    pricing_rule = frappe.get_all("Pricing Rule", filters={
+        "item_code": item["item_code"],
+        "for_price_list": "Standard Selling",
+        "selling": 1
+    }, fields=["discount_percentage", "discount_amount"])
+
+    if pricing_rule:
+        print(pricing_rule[0],"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
+        pricing_rule = pricing_rule[0]
+        values["discount_percentage"] = pricing_rule.get("discount_percentage", 0)
+        values["discount_amount"] = pricing_rule.get("discount_amount", 0)
+    else:
+        values["discount_percentage"] = 0
+        values["discount_amount"] = 0
+
+    values["rate"] = rate
+    values["serial_no"] = serial_nos
+    values["batch_nos"] = batch_nos
+    values["selected_serial_no"] = [value.get("serial_no")] if value.get("has_serial_no") and value.get("serial_no") else []
+    values["selected_batch_no"]= item.get("batch_no") if value.get("has_batch_no") and item.get("batch_no") else None
+
+    return values
