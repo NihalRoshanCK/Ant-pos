@@ -10,7 +10,7 @@
           <FormControl
             type="text"
             label="Customer Name"
-            v-model="customer.name"
+            v-model="customer.customer_name"
             placeholder="Enter Customer Name"
             size="sm"
           />
@@ -19,7 +19,7 @@
           <FormControl
             type="text"
             label="Mobile Number"
-            v-model="customer.mobile"
+            v-model="customer.mobile_no"
             placeholder="Enter Mobile Number"
             size="sm"
           />
@@ -28,7 +28,7 @@
           <FormControl
             type="email"
             label="Email ID"
-            v-model="customer.email"
+            v-model="customer.email_id"
             placeholder="Enter Email ID"
             size="sm"
           />
@@ -43,12 +43,22 @@
             size="sm"
             
           />
-  
+
+      <!-- Customer Type
+      <FormControl
+          type="select"
+          label="Customer Type"
+          v-model="customer.customer_type"
+          :options="customerTypeOptions"
+          placeholder="Select Customer Type"
+          size="sm"
+        />
+   -->
           <!-- Customer Group -->
           <FormControl
             type="autocomplete"
             label="Customer Group"
-            v-model="customer.group"
+            v-model="customer.customer_group"
             :options="customerGroupsOptions"
             placeholder="Select Customer Group"
             size="sm"
@@ -88,16 +98,28 @@
   
   // Customer object
   const customer = ref({
-    name: '',
-    mobile: '',
-    email: '',
+    customer_name: '',
+    mobile_no: '',
+    email_id: '',
     gender: '',
-    group: '',
+    customer_type: 'Individual',
+    customer_group:"",
     territory: '',
-    company:base.pos_profile.company
+    posa_referral_company:base.pos_profile.company,
+    gst_category:"Unregistered",
+
 
   });
-  
+  // Customer Type Options
+const customerTypeOptions = [
+  { label: 'Individual', value: 'Individual' },
+  { label: 'Company', value: 'Company' },
+];
+
+
+
+
+
   // Fetching options for dropdowns
   const genderOptionsResource = createListResource({
     doctype: 'Gender',
@@ -144,10 +166,11 @@
     const customerData = {
   ...customer.value,
   gender: customer.value.gender?.value ?? null,
-  group: customer.value.group?.value ?? null,
+  customer_group: customer.value.customer_group?.value ?? null,
   territory: customer.value.territory?.value ?? null
 };
     
+console.log('Customer Data:', customerData);
     createResource({
       method: 'POST',
       url: '/api/resource/Customer',
