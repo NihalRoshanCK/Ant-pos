@@ -1,9 +1,11 @@
 import frappe
 import json
 from frappe import _ 
-from erpnext.stock.get_item_details import get_item_details , get_item_price
+from erpnext.stock.get_item_details import get_item_details , get_item_price , apply_price_list
 from erpnext.stock.doctype.batch.batch import get_batch_qty
+from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
 BarcodeScanResult = dict[str, str | None]
+
 
 def _update_item_info(scan_result: dict[str, str | None]) -> dict[str, str | None]:
 	if item_code := scan_result.get("item_code"):
@@ -102,7 +104,7 @@ def items(pos_profile, search_value, customer):
     if item.get("has_batch_no"):
         batch_nos = frappe.get_all("Batch", filters={"item": item["item_code"]}, fields=["name as batch_no", "expiry_date"])
 
-    rate = 150
+    # rate = 150
     items = {
         "item_code": item["item_code"],
         "barcode": value.get("barcode"),
@@ -119,33 +121,15 @@ def items(pos_profile, search_value, customer):
         "cost_center": pos_profile_data.get('cost_center'),
         "tax_category": pos_profile_data.get('tax_category'),
         "serial_no": serial_nos,
-        "rate": rate,
+        # "rate": rate,
         "batch_no": value.get("batch_no"),
-        "warehouse": pos_profile_data.get('warehouse')
+        "warehouse": pos_profile_data.get('warehouse'),
+		"is_pos":1
     }
 
     # Fetch item details
     values = get_item_details(items, doc=None, overwrite_warehouse=False)
-    
-    test=get_item_price(items,item.item_code)
-    print(test,item.item_code,"********************************8")
-    # Fetch discount details from pricing rule
-    pricing_rule = frappe.get_all("Pricing Rule", filters={
-        "item_code": item["item_code"],
-        "for_price_list": "Standard Selling",
-        "selling": 1
-    }, fields=["discount_percentage", "discount_amount"])
-
-    if pricing_rule:
-        print(pricing_rule[0],"$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-        pricing_rule = pricing_rule[0]
-        values["discount_percentage"] = pricing_rule.get("discount_percentage", 0)
-        values["discount_amount"] = pricing_rule.get("discount_amount", 0)
-    else:
-        values["discount_percentage"] = 0
-        values["discount_amount"] = 0
-
-    values["rate"] = rate
+    # values["rate"] = rate
     values["serial_no"] = serial_nos
     values["batch_nos"] = batch_nos
     values["selected_serial_no"] = [value.get("serial_no")] if value.get("has_serial_no") and value.get("serial_no") else []

@@ -170,7 +170,7 @@
         <div class="w-full">
             <div class="p-2">
                 <Autocomplete
-                    :options=item.serial_no_options
+                    :options=getserialNo(item.serial_no,item.batch_no)
                     placeholder="Serial No"
                     :multiple="true"
                     v-model="item.selected_serial_no"
@@ -259,16 +259,22 @@ const getbatchNo = (batch_nos) => {
 watch(
   () => props.item.batch_no,
   (newBatchNo, oldBatchNo) => {
-    if (newBatchNo && newBatchNo !== oldBatchNo) {
-      console.log(`Batch No changed from ${oldBatchNo} to ${newBatchNo}`);
+    if (newBatchNo &&( newBatchNo.value !== oldBatchNo?.value)|| !oldBatchNo) {
+      console.log(`Batch No changed from ${oldBatchNo} to ${newBatchNo.value}`);
       props.item.selected_batch_no= newBatchNo.value;
       props.item.serial_no_options =  props.item.serial_no.filter((serial_no) =>  props.item.selected_batch_no && serial_no.batch_no ===  props.item.selected_batch_no)
                 .map((serial_no) => ({
                     label: serial_no.serial_no,
                     value: serial_no.serial_no,
         }));
-    } else {
-      props.item.serial_no_options = [];
+        props.item.selected_serial_no = [];
+    }
+    ()=>props.item.selected_serial_no,(
+    newserial ,oldserial 
+    )=>{
+        if (!oldserial){
+            props.item.serial_no_option=props.item.selected_serial_no
+        }
     }
   }
 );

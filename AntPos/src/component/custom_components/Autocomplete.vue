@@ -13,7 +13,7 @@
               class="flex h-7 w-full items-center justify-between gap-2 rounded bg-gray-100 px-2 py-1 transition-colors hover:bg-gray-200 focus:ring-2 focus:ring-gray-400"
               :class="{ 'bg-gray-200': isComboboxOpen }"
               @click="() => togglePopover()"
-              >
+            >
               <div class="flex items-center overflow-hidden">
                 <slot name="prefix" />
                 <span class="truncate text-base leading-5" v-if="selectedValue">
@@ -23,12 +23,7 @@
                   {{ placeholder || '' }}
                 </span>
               </div>
-              <!-- <FeatherIcon
-                name="chevron-down"
-                class="h-4 w-4 text-gray-600"
-                aria-hidden="true"
-              /> -->
-              <slot name="suffix"  />
+              <slot name="suffix" />
             </button>
           </div>
         </slot>
@@ -114,8 +109,8 @@
                       <span class="flex-1 truncate">
                         {{ getLabel(option) }}  
                       </span>
-                      <span class=" truncate">
-                        {{getmobile(option)}}
+                      <span class="truncate">
+                        {{ getmobile(option) }}
                       </span>
                     </div>
 
@@ -158,8 +153,9 @@
                     v-if="areAllOptionsSelected"
                     label="Clear All"
                     @click.stop="clearAll"
-                  /></div
-              ></slot>
+                  />
+                </div>
+              </slot>
             </div>
           </div>
         </div>
@@ -177,7 +173,7 @@ import {
   ComboboxOptions,
 } from '@headlessui/vue'
 import { nextTick } from 'vue'
-import { FeatherIcon , Button , Popover} from 'frappe-ui'
+import { FeatherIcon , Button , Popover } from 'frappe-ui'
 
 export default {
   name: 'Autocomplete',
@@ -200,7 +196,7 @@ export default {
     ComboboxOption,
     ComboboxButton,
   },
-  expose: ['togglePopover','closeOptions'],
+  expose: ['togglePopover', 'closeOptions'],
   data() {
     return {
       query: '',
@@ -209,41 +205,41 @@ export default {
   },
   computed: {
     selectedValue: {
-    get() {
-      if (!this.multiple) {
-        return this.findOption(this.modelValue);
-      }
-      // In case of multiple, modelValue is an array of values
-      // If the modelValue is a list of values, convert them to options
-      return isOptionOrValue(this.modelValue?.[0]) === 'value'
-        ? this.modelValue?.map((v) => this.findOption(v))
-        : this.modelValue;
+      get() {
+        if (!this.multiple) {
+          return this.findOption(this.modelValue);
+        }
+        // In case of multiple, modelValue is an array of values
+        // If the modelValue is a list of values, convert them to options
+        return isOptionOrValue(this.modelValue?.[0]) === 'value'
+          ? this.modelValue?.map((v) => this.findOption(v))
+          : this.modelValue;
+      },
+      set(val) {
+        this.query = '';
+        if (val && !this.multiple) this.showOptions = false;
+        this.$emit('update:modelValue', val);
+      },
     },
-    set(val) {
-      this.query = '';
-      if (val && !this.multiple) this.showOptions = false;
-      this.$emit('update:modelValue', val);
-    },
-  },
-
     groups() {
-    if (!this.options || this.options.length === 0) return [];
+      if (!this.options || this.options.length === 0) return [];
 
-    let groups = this.options[0]?.group
-      ? this.options
-      : [{ group: '', items: this.sanitizeOptions(this.options) }];
+      let groups = this.options[0]?.group
+        ? this.options
+        : [{ group: '', items: this.sanitizeOptions(this.options) }];
 
-    return groups
-      .map((group, i) => {
-        return {
-          key: i,
-          group: group.group,
-          hideLabel: group.hideLabel || false,
-          items: this.filterOptions(this.sanitizeOptions(group.items)),
-        };
-      })
-      .filter((group) => group.items.length > 0);
-  },
+      return groups
+        .map((group, i) => {
+          const sanitizedItems = this.sanitizeOptions(group.items) || [];
+          return {
+            key: i,
+            group: group.group,
+            hideLabel: group.hideLabel || false,
+            items: this.filterOptions(sanitizedItems),
+          };
+        })
+        .filter((group) => group.items.length > 0);
+    },
     allOptions() {
       return this.groups.flatMap((group) => group.items)
     },
@@ -265,12 +261,11 @@ export default {
       this.showOptions = val ?? !this.showOptions
     },
     closeOptions() {
-    console.log("Closing options..."); 
-    this.showOptions = false;
-    this.openPopover = false;
-    // v-slot:"{ open: openPopover, togglePopover }"
-    this.togglePopover=false
-    this.isComboboxOpen=false
+      console.log("Closing options...");
+      this.showOptions = false;
+      this.openPopover = false;
+      this.togglePopover = false
+      this.isComboboxOpen = false
     },
     findOption(option) {
       if (!option) return option
@@ -278,18 +273,18 @@ export default {
       return this.allOptions.find((o) => o.value === value)
     },
     filterOptions(options) {
-    if (!options) return [];
-    if (!this.query) return options;
-    const lowerQuery = this.query.trim().toLowerCase();
-    return options.filter((option) => {
-      const labelMatch = option.label?.toLowerCase().includes(lowerQuery);
-      const valueMatch = option.value?.toLowerCase().includes(lowerQuery);
-      const mobileMatch = option.mobile_no
-        ? option.mobile_no.toString().toLowerCase().includes(lowerQuery)
-        : false;
-      return labelMatch || valueMatch || mobileMatch;
-    });
-  },
+      if (!options) return [];
+      if (!this.query) return options;
+      const lowerQuery = this.query.trim().toLowerCase();
+      return options.filter((option) => {
+        const labelMatch = option.label?.toLowerCase().includes(lowerQuery);
+        const valueMatch = option.value?.toLowerCase().includes(lowerQuery);
+        const mobileMatch = option.mobile_no
+          ? option.mobile_no.toString().toLowerCase().includes(lowerQuery)
+          : false;
+        return labelMatch || valueMatch || mobileMatch;
+      });
+    },
     displayValue(option) {
       if (!option) return ''
 
@@ -300,7 +295,7 @@ export default {
       if (!Array.isArray(option)) return ''
 
       // in case of `multiple`, option is an array of values
-      // so the display value should be comma separated labels
+      // so the display value should be comma-separated labels
       return option.map((v) => this.getLabel(this.findOption(v))).join(', ')
     },
     getLabel(option) {
@@ -309,7 +304,7 @@ export default {
     },
     getmobile(option) {
       if (isOptionOrValue(option) === 'value') return option
-      return option?.mobile_no || option?.mobile_no || ''
+      return option?.mobile_no || ''
     },
     sanitizeOptions(options) {
       if (!options) return []

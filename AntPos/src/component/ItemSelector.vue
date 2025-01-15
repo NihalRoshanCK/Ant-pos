@@ -62,16 +62,7 @@
                 };
             },
             onSuccess(data) {
-                data.open= false;
-                data.serial_no_options = data.serial_no
-                .filter((serial_no) => data.selected_batch_no && serial_no.batch_no === data.selected_batch_no)
-                .map((serial_no) => ({
-                    label: serial_no.serial_no,
-                    value: serial_no.serial_no,
-                }));
-                console.log(data, "data");
-                
-                base.items.push(data);
+                addItem(data)
                 debounceSearch.value = '';
                 
                 
@@ -88,15 +79,21 @@
     };
     
     // Functions to manipulate the hash map
-const addItem = (item) => {
-    const key = generateKey(item);
-    if (!base.items[key]) {
-        base.items[key] = item;
-    } else {
-        console.log(`Item with key "${key}" already exists.`);
-    }
+const addItem = (data) => {
+    data.open= false;
+    data.serial_no_options = data.serial_no
+    .filter((serial_no) => data.selected_batch_no && serial_no.batch_no === data.selected_batch_no)
+    .map((serial_no) => ({
+        label: serial_no.serial_no,
+        value: serial_no.serial_no,
+    }));
+    console.log(data, "data");
+    
+    base.items.push(data);
 };
+const itemController=()=>{
 
+}
 const editItem = (item) => {
     const key = generateKey(item);
     if (base.items[key]) {
