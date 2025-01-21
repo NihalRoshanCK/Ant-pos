@@ -44,8 +44,7 @@
 
 
 <script setup>
-import { Dialog, createListResource, Button, FormControl, createResource } from 'frappe-ui';
+import { Dialog, Button, FormControl } from 'frappe-ui';
 
-console.log("heyyyyyyyy.......");
 
 </script>

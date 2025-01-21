@@ -70,11 +70,9 @@
 <script setup>
 import { ref, computed, inject } from 'vue';
 import { Dialog, createListResource, Button, FormControl, createResource } from 'frappe-ui';
-import eventBus from '/src/utils/eventBus.js'; // Correct import statement
 
 const dialogVisible = ref(true);
 const base = inject('base');
-const { currentComponent, loadComponent } = inject('dynamicComponent');
 
 const customer = ref({
   customer_name: '',
@@ -140,8 +138,7 @@ const createCustomer = () => {
       };
     },
     onSuccess(data) {
-      console.log(data,'Customer Created:'); // Check if data is correct
-      // eventBus.emit('customer-created', data.name);
+      console.log(data,'Customer Created:'); 
       handleDialogClose();
     },
     onError(err) {

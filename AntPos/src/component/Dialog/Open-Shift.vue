@@ -70,10 +70,7 @@
     import { createResource, Button, Dialog, FormControl } from 'frappe-ui';
     import { inject, ref, watch, reactive } from 'vue';
 
-    const options = reactive({
-                        company: [],
-                        profile: {},
-                    });
+    const options = reactive({company: [],profile: {},});
     const dialog1 = ref(false);
     const autocompleteValue = ref({});
     const autocompleteProfileValue = ref({});
@@ -94,60 +91,56 @@
         },
     });
     const confirmShift = async () => {
-    // loading.value = true;
-    // errorMessage.value = '';
-    
-    const submissionData = {
-        company: autocompleteValue.value.value || null,
-        pos_profile: autocompleteProfileValue.value.value || null,
-        status: 'Open',
-        opening_balance_details: mode_of_payment.value.map((mode) => ({
-        mode_of_payment: mode,
-        opening_amount: openingAmounts[mode] || 0,
-        })),
-    };
+      const submissionData = {
+          company: autocompleteValue.value.value || null,
+          pos_profile: autocompleteProfileValue.value.value || null,
+          status: 'Open',
+          opening_balance_details: mode_of_payment.value.map((mode) => ({
+          mode_of_payment: mode,
+          opening_amount: openingAmounts[mode] || 0,
+          })),
+      };
 
-    try {
-        await submit.submit({ values: submissionData });
-        console.log('Submitted Data:', submissionData);
-        closeDialog();
-    } catch (error) {
-        errorMessage.value = 'Failed to submit data. Please try again.';
-        console.error('Submission Error:', error);
-    } finally {
-        // loading.value = false;
-    }
+      try {
+          await submit.submit({ values: submissionData });
+          console.log('Submitted Data:', submissionData);
+          closeDialog();
+      } catch (error) {
+          errorMessage.value = 'Failed to submit data. Please try again.';
+          console.error('Submission Error:', error);
+      } finally {
+      }
     };
 
 
     const getModeOfPayment = () => {
-    if (getProfileOptions()) {
-        const profiles = options.profile[autocompleteValue.value.value];
-        const profile = profiles.find((p) => p.name === autocompleteProfileValue.value.value);
-        return profile ? profile.modes_of_payment : [];
-    }
-    return [];
+      if (getProfileOptions()) {
+          const profiles = options.profile[autocompleteValue.value.value];
+          const profile = profiles.find((p) => p.name === autocompleteProfileValue.value.value);
+          return profile ? profile.modes_of_payment : [];
+      }
+      return [];
     };
 
     const getProfileOptions = () => {
-    const profile = options.profile[autocompleteValue.value.value];
-    return profile ? profile.map((item) => item.name) : [];
+      const profile = options.profile[autocompleteValue.value.value];
+      return profile ? profile.map((item) => item.name) : [];
     };
 
     const openDialog = () => {
-    const posprofile = createResource({
-        url: 'ant_pos.ant_pos.api.pos_profile.get_pos_profiles_by_company',
-        method: 'GET',
+      const posprofile = createResource({
+          url: 'ant_pos.ant_pos.api.pos_profile.get_pos_profiles_by_company',
+          method: 'GET',
 
-        onSuccess(data) {
-        if (data && typeof data === 'object') {
-            options.company = Object.keys(data);
-            options.profile = data;
-        }
-        },
-    });
-    posprofile.fetch();
-    dialog1.value = true;
+          onSuccess(data) {
+          if (data && typeof data === 'object') {
+              options.company = Object.keys(data);
+              options.profile = data;
+          }
+          },
+      });
+      posprofile.fetch();
+      dialog1.value = true;
     };
     const validate_pos = createResource({
         url: 'ant_pos.ant_pos.api.pos_profile.get_openingshift',
@@ -155,17 +148,17 @@
         auto:true,
 
         onSuccess(data) {
-        if (data){
+          if (data){
             Object.assign(base, data);         
             dialog1.value=false;
-        }else{
+          }else{
             openDialog()
-        }
+          }
         },
     });
     watch(autocompleteProfileValue, (newVal, oldVal) => {
-    if (newVal.value !== oldVal.value) {
-        mode_of_payment.value = getModeOfPayment();
-    }
+      if (newVal.value !== oldVal.value) {
+          mode_of_payment.value = getModeOfPayment();
+      }
     });
 </script>

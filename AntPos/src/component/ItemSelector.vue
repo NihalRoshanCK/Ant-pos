@@ -8,6 +8,7 @@
                     placeholder="Search Items"
                     size="sm"
                     variant="subtle"
+                    @keyup.enter="debouncedSearchResource"
                 >
                     <template #prefix>
                        <FeatherIcon
@@ -37,90 +38,106 @@
     </div>
 </template>
 
-
 <script setup>
     import { FormControl, FeatherIcon , createResource} from 'frappe-ui';
-    import { ref , watch, inject  } from 'vue';
+    import { ref , inject  } from 'vue';
+
     const debounceSearch = ref('');
     const items = ref([]);
     let base = inject('base');
+    
+    // Debounce function
+    const debounce = (func, delay) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+                func.apply(this, args);
+            }, delay);
+        };
+    };
+
     const searchResource = () => {
         if (!base.customer){
             return console.log('Please select a customer');
-            
         }
         createResource({
             url: 'ant_pos.ant_pos.api.item.items',
             method: 'GET',
-            // debounce: 500, 
-            auto:true,
+            auto: true,
             makeParams() {
                 return {
                     search_value: debounceSearch.value, 
-                    pos_profile:JSON.stringify(base.pos_profile),
-                    customer:base.customer
+                    pos_profile: JSON.stringify(base.pos_profile),
+                    customer: base.customer
                 };
             },
             onSuccess(data) {
-                addItem(data)
+                addItem(data);
                 debounceSearch.value = '';
-                
-                
             },
             onError(error) {
                 console.error('Search error:', error);
-
             },
         });
-
-    }
-    const generateKey = (item) => {
-        return `${item.item_code}`;
     };
+
+    // Debounced version of searchResource
+    const debouncedSearchResource = debounce(searchResource, 300);
     
-    // Functions to manipulate the hash map
-const addItem = (data) => {
-    data.open= false;
-    data.serial_no_options = data.serial_no
-    .filter((serial_no) => data.selected_batch_no && serial_no.batch_no === data.selected_batch_no)
-    .map((serial_no) => ({
-        label: serial_no.serial_no,
-        value: serial_no.serial_no,
-    }));
-    console.log(data, "data");
-    
-    base.items.push(data);
-};
-const itemController=()=>{
+    const addItem = (data) => {
+        let find = false;
+        data.open = false;
 
-}
-const editItem = (item) => {
-    const key = generateKey(item);
-    if (base.items[key]) {
-        base.items[key] = item;
-    } else {
-        console.error(`Item with key "${key}" not found.`);
-    }
-};
+        find = differentiate(data, find);
 
-const deleteItem = (item) => {
-    const key = generateKey(item);
-    if (base.items[key]) {
-        delete base.items[key];
-    } else {
-        console.error(`Item with key "${key}" not found.`);
-    }
-};
-
-// Utility function to get an item by key
-const getItem = (item) => {
-    const key = generateKey(item);
-    return base.items[key] || null;
-}
-    watch(debounceSearch, (newVal) => {
-        console.log('Debounce search value:', newVal);
-        if (newVal) {
-        searchResource();
+        if (find) {
+            return;
         }
-    });
+
+        if (data.has_batch_no && data.batch_no) {
+            data.serial_no_options = data.serial_no
+                .filter(serial_no => data.batch_no && serial_no.batch_no === data.batch_no)
+                .map(serial_no => (
+                    {                    
+                        label: serial_no.serial_no,
+                        value: serial_no.serial_no,
+                    }
+                ));
+        }
+
+        addNewLine(data);
+    };
+
+    const differentiate = (data, find) => {
+        if (!base.pos_profile.custom_allow_add_new_items_on_new_line) {
+            base.items.forEach((element, index) => {
+                if (data.item_code === element.item_code && ((data.has_batch_no && data.batch_no === element.batch_no) || !data.has_batch_no)) {
+                    if (data.has_serial_no && data.serial_no) {
+                        for (let serial of data.selected_serial_no) {
+                            if (element.selected_serial_no.includes(serial)) {
+                                return; 
+                            }
+                            addchild(base.items[index].selected_serial_no, data.selected_serial_no[0]);
+                        }
+                    }
+                    base.items[index].qty += 1;
+                    find = true;
+                }
+            });
+        }
+        return find;
+    };
+
+    const addNewLine = (data) => {
+        base.items.push(data);
+    };
+
+    const addchild = (data, value) => {
+        data.push(value);
+    };
+    const rateCalculation = (data) =>{
+        return data.price_list_rate - ( (data.discount_percentage * data.price_list_rate)/100)
+    }
+
 </script>

@@ -18,7 +18,7 @@ import eventBus from '/src/utils/eventBus.js'; // Correct import statement
 
 const selected_customer = ref('');
 const autocompleteRef = ref(null);
-const { currentComponent, loadComponent } = inject('dynamicComponent');
+const { loadComponent } = inject('dynamicComponent');
 let base = inject('base');
 
 // Define the customer list resource

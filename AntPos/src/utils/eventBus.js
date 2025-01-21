@@ -22,4 +22,9 @@ eventBus.off = function(event, fn) {
   this[event] = this[event].filter(listener => listener !== fn);
 };
 
+eventBus.add_item = function(event, fn) {
+  if (!this[event]) return;
+  this[event] = this[event].filter(listener => listener !== fn);
+};
 export default eventBus;
+
