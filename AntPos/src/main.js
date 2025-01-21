@@ -25,7 +25,10 @@ app.component('Card', Card)
 app.component('Input', Input)
 
 // Create a reactive base object and provide it
-const base = reactive({})
+const base = reactive({
+  Ant_Opening_Shift:{},
+  items:[]
+})
 app.provide('base', base) // 'base' is the key for injection
 
 app.mount('#app')
