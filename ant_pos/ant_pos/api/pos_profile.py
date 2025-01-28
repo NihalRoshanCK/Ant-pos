@@ -62,7 +62,6 @@ def get_pos_profiles_by_company():
             "modes_of_payment": [mop["mode_of_payment"] for mop in modes_of_payment],
         })
 
-    # Optional: Log for debugging during development
 
     return company_profiles
 
@@ -95,10 +94,6 @@ def create_opening(values):
 
         ant_opening_shift.submit()
 
-        # Optionally, submit the document if it requires workflow completion
-        # ant_opening_shift.submit()
-
-        # Return the name of the new document
         return ant_opening_shift.name
 
     except Exception as e:
