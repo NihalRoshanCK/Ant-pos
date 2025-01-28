@@ -107,72 +107,58 @@ const addItemsResource = createResource({
     },
 });
 
-// Price list resource
 const priceListResource = createResource({
-    url: 'erpnext.stock.get_item_details.apply_price_list',
-    method: 'GET',  // Change to POST if your endpoint requires it
+    url: 'erpnext.stock.get_item_details.apply_price_list', // API endpoint
+    method: 'POST', // Change to POST as most ERPNext APIs use POST
     debounce: 500,
     auto: false,
-    makeParams(
-        // params
-    ) {
+    makeParams() {
         return {
             args: JSON.stringify({
-                items: [{
-
-                    doctype :'Sales Invoice Item', 
-                    
-    'name': 'new-sales-invoice-item-eotwgkgxuj', 
-
-    'child_docname': 'new-sales-invoice-item-eotwgkgxuj', 
-
-    'item_code': 'SR-MWR-SRT-LINEN-HS', 
-    
-    'item_group': 'SURPLUS PRODUCTS', 
-
-    'brand': null, 
-
-    'qty': 2, 
-
-    'stock_qty': 1, 
-    
-    'uom': 'Nos', 
-    
-    'stock_uom': 'Nos', 
-
-    'parenttype': 'Sales Invoice', 
-
-    'parent': 'new-sales-invoice-qezoodyekr', 
-
-    'pricing_rules': '[\n "PRLE-0003"\n]', 
-
-    'is_free_item': 0, 
-    
-    'warehouse': 'MG Road - FITPL', 
-
-    'serial_no': '3030012506\n3030012505', 
-
-    'batch_no': 'B303001-24010-00010', 
-
-    'price_list_rate': 1899, 
-    
-    'conversion_factor': 1, 
-    
-    'margin_type': '', 
-    
-    'margin_rate_or_amount': 0
-}
+                items: [
+                    {
+                    "doctype": "Sales Invoice Item",
+                    "name": "new-sales-invoice-item-lrdmbgmbcz",
+                    "child_docname": "new-sales-invoice-item-lrdmbgmbcz",
+                    "item_code": "SR-MWR-SRT-LINEN-HS",
+                    "item_group": "SURPLUS PRODUCTS",
+                    "brand": null,
+                    "qty": 2,
+                    "stock_qty": 2,
+                    "uom": "Nos",
+                    "stock_uom": "Nos",
+                    "parenttype": "Sales Invoice",
+                    "parent": "new-sales-invoice-owspmikswv",
+                    "pricing_rules": [
+                    "PRLE-0003"
+                    ],
+                    "is_free_item": 0,
+                    "warehouse": "MG Road - FITPL",
+                    "serial_no": "3030012506\n3030012508",
+                    "batch_no": "B303001-24010-00010",
+                    "price_list_rate": 1899,
+                    "conversion_factor": 1,
+                    "margin_type": "Percentage",
+                    "margin_rate_or_amount": 0
+                    }
                 ],
-                customer: base.customer.name,
-                customer_group: base.customer.customer_group,
-                currency: base.pos_profile.currency,
-                conversion_rate: 1,
-                price_list: "Standard Selling",
-                company: base.pos_profile.company,
-                transaction_date: "",
-                campaign: "",
-                sales_partner: "",
-                ignore_pricing_rule: 0
+                    "customer":base.customer.name,
+                    "customer_group":  base.customer.customer_group,
+                    "territory": "India",
+                    "currency":base.pos_profile.currency,
+                    "conversion_rate": 1,
+                    "price_list": "Standard Selling",
+                    "price_list_currency": "INR",
+                    "plc_conversion_rate": 1,
+                    "company": base.pos_profile.company,
+                    "transaction_date": "",
+                    "ignore_pricing_rule": 0,
+                    "doctype": "Sales Invoice",
+                    "name": "new-sales-invoice-owspmikswv",
+                    "is_return": 0,
+                    "update_stock": 1,
+                    "pos_profile": "FORMOST MG Road",
+                    "is_internal_customer": 0
             })
         };
     },
@@ -180,9 +166,10 @@ const priceListResource = createResource({
         console.error('Price list error:', error);
     },
     onSuccess(data) {
-        console.log(data, "Price list data");
-    },
+        console.log('Price list data:', data);
+    }
 });
+
 
 // Add item to the list
 const addItem = (data) => {
