@@ -79,60 +79,61 @@ def scan_barcode(search_value: str) -> BarcodeScanResult:
 	return {}
 
 
-
 @frappe.whitelist()
 def items(pos_profile, search_value, customer):
     if not customer:
         frappe.throw(_("Please select the customer"))
 
-    value = scan_barcode(search_value)
-    if not value or not value.get("item"):
-        frappe.throw(_("No item found for the given barcode."))
+    # Check if search_value is empty or not a valid JSON string
+    if not search_value:
+        frappe.throw(_("Search value is required"))
+
+    try:
+        search_values = frappe._dict(json.loads(search_value))
+    except json.JSONDecodeError:
+        frappe.throw(_("Invalid search value format"))
 
     pos_profile_data = frappe._dict(json.loads(pos_profile))
-    company = frappe.db.get_value('Company', pos_profile_data.get('company'), ['default_currency', 'name'], as_dict=True)
+    company = frappe.db.get_value('Company', pos_profile_data.company, ['default_currency', 'name'], as_dict=True)
     customer_doc = frappe.db.get_value('Customer', customer, ['is_internal_customer'], as_dict=True)
-    item = value["item"]
+    item = search_values.item
 
     serial_nos = []
     batch_nos = []
 
-    if item.get("has_serial_no"):
-        serial_filters = {"item_code": item["item_code"], "warehouse": pos_profile_data.get('warehouse')}
+    if item['has_serial_no']:
+        serial_filters = {"item_code": item["item_code"], "warehouse": pos_profile_data.warehouse}
         serial_nos = frappe.get_all("Serial No", filters=serial_filters, fields=["name as serial_no", "batch_no"])
 
-    if item.get("has_batch_no"):
+    if item['has_batch_no']:
         batch_nos = frappe.get_all("Batch", filters={"item": item["item_code"]}, fields=["name as batch_no", "expiry_date"])
 
-    # rate = 150
     items = {
         "item_code": item["item_code"],
-        "barcode": value.get("barcode"),
+        "barcode": search_values.barcode,
         "customer": customer,
-        "currency": company.get('default_currency'),
-        "is_internal_customer": customer_doc.get('is_internal_customer'),
+        "currency": company.default_currency,
+        # "is_internal_customer": customer_doc.is_internal_customer,
         "price_list": "Standard Selling",
-        "price_list_currency": company.get('default_currency'),
-        "company": company.get('name'),
+        "price_list_currency": company.default_currency,
+        "company": company.name,
         "ignore_pricing_rule": 0,
         "doctype": "Sales Invoice",
-        "stock_uom": item.get('stock_uom'),
-        "pos_profile": pos_profile_data.get('name'),
-        "cost_center": pos_profile_data.get('cost_center'),
-        "tax_category": pos_profile_data.get('tax_category'),
+        "stock_uom": item['stock_uom'],
+        "pos_profile": pos_profile_data.name,
+        "cost_center": pos_profile_data.cost_center,
+        "tax_category": pos_profile_data.tax_category,
         "serial_no": serial_nos,
-        # "rate": rate,
-        "batch_no": value.get("batch_no"),
-        "warehouse": pos_profile_data.get('warehouse'),
-		"is_pos":1
+        "batch_no": search_values.batch_no,
+        "warehouse": pos_profile_data.warehouse,
+        "is_pos": 1
     }
 
     # Fetch item details
     values = get_item_details(items, doc=None, overwrite_warehouse=False)
-    # values["rate"] = rate
     values["serial_no"] = serial_nos
     values["batch_nos"] = batch_nos
-    values["selected_serial_no"] = [value.get("serial_no")] if value.get("has_serial_no") and value.get("serial_no") else []
-    values["selected_batch_no"]= item.get("batch_no") if value.get("has_batch_no") and item.get("batch_no") else None
+    values["selected_serial_no"] = [search_values.serial_no] if item['has_serial_no'] and search_values.serial_no else []
+    values["selected_batch_no"] = batch_nos if item['has_batch_no'] and batch_nos else None
 
     return values
