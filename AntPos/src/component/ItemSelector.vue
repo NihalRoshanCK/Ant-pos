@@ -1,8 +1,7 @@
 <template>
-    <div class="w-1/2">
+    <div class="w-1/2 shadow-2xl pt-2 px-2  rounded">
         <div>
             <div>
-                <!-- Search Input -->
                 <FormControl
                     type="text"
                     v-model="debounceSearch"
@@ -15,8 +14,6 @@
                         <FeatherIcon class="w-4" name="search" />
                     </template>
                 </FormControl>
-
-                <!-- Search Results -->
                 <div>
                     <div v-if="items.length === 0" class="text-center text-gray-500">
                         No items found. Try searching again.
@@ -210,7 +207,7 @@ const addItemIfExists = (data) => {
                 if (data.has_serial_no && data.serial_no) {
                     for (let serial of data.selected_serial_no) {
                         if (element.selected_serial_no.includes(serial)) {
-                            return true;
+                            return false;
                         }
                         addChild(base.items[index].selected_serial_no, data.selected_serial_no[0]);
                     }

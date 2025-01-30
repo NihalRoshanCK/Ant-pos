@@ -1,12 +1,18 @@
 <template>
     <div class="bg-gray-300 w-screen h-full flex items-center justify-between p-4">
-        <div class="flex gap-4">
+        <div class="flex gap-4 items-center">
             <div>
-                han
+                <FeatherIcon name="menu" class="w-5 h-5"/>
             </div>
-            <div>
-                Ant-Pos 
+            <div class="flex text-center gap-3  items-center">
+                <img src="" class="w-8 h-8" alt="logo">
+                <p class="text-xl ">
+                    Ant-Pos 
+                </p>
             </div>
+            <!-- <div>
+                
+            </div> -->
         </div>
         <div class="flex gap-4">
             <div>

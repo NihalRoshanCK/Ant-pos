@@ -10,9 +10,6 @@
         <ItemSelector/>
         <ItemDetail/>
       </div>
-      <!-- <div class="h-">
-
-      </div> -->
     </div>
   </template>
 
