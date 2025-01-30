@@ -103,7 +103,6 @@
 
       try {
           await submit.submit({ values: submissionData });
-          console.log('Submitted Data:', submissionData);
           closeDialog();
       } catch (error) {
           errorMessage.value = 'Failed to submit data. Please try again.';
@@ -129,36 +128,36 @@
 
     const openDialog = () => {
       const posprofile = createResource({
-          url: 'ant_pos.ant_pos.api.pos_profile.get_pos_profiles_by_company',
-          method: 'GET',
+        url: 'ant_pos.ant_pos.api.pos_profile.get_pos_profiles_by_company',
+        method: 'GET',
 
-          onSuccess(data) {
+        onSuccess(data) {
           if (data && typeof data === 'object') {
               options.company = Object.keys(data);
               options.profile = data;
           }
-          },
+        },
       });
       posprofile.fetch();
       dialog1.value = true;
     };
     const validate_pos = createResource({
-        url: 'ant_pos.ant_pos.api.pos_profile.get_openingshift',
-        method: 'GET',
-        auto:true,
+      url: 'ant_pos.ant_pos.api.pos_profile.get_openingshift',
+      method: 'GET',
+      auto:true,
 
-        onSuccess(data) {
-          if (data){
-            Object.assign(base, data);         
-            dialog1.value=false;
-          }else{
-            openDialog()
-          }
-        },
+      onSuccess(data) {
+        if (data){
+          Object.assign(base, data);         
+          dialog1.value=false;
+        }else{
+          openDialog()
+        }
+      },
     });
     watch(autocompleteProfileValue, (newVal, oldVal) => {
       if (newVal.value !== oldVal.value) {
-          mode_of_payment.value = getModeOfPayment();
+        mode_of_payment.value = getModeOfPayment();
       }
     });
 </script>

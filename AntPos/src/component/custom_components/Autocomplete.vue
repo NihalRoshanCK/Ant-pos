@@ -261,7 +261,6 @@ export default {
       this.showOptions = val ?? !this.showOptions
     },
     closeOptions() {
-      console.log("Closing options...");
       this.showOptions = false;
       this.openPopover = false;
       this.togglePopover = false

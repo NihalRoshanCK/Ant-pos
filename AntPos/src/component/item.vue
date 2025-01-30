@@ -13,10 +13,10 @@
             {{ item.uom }}
         </div>
         <div class="w-[18.4%]">
-            {{ item.rate }}
+            {{ item.rate.toFixed(2) }}
         </div>
         <div class="w-[18.4%]">
-            {{item.amount}}
+            {{item.amount.toFixed(2) }}
         </div>
         <div class="w-[8%] flex items-center justify-center">
             <FeatherIcon name="trash-2" class="w-5 h-5 rounded hover:bg-red-400 fill-red-700" @click="base.items.splice(index, 1)" />
@@ -66,9 +66,9 @@
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
-                    placeholder="Rate"
                     :disabled="false"
                     label="Rate"
+                    :placeholder="item.rate.toFixed(2)"
                     v-model="item.rate"
                 />
             </div>
@@ -90,9 +90,9 @@
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
-                    placeholder="Discount Amount"
                     :disabled="false"
                     label="Discount Amount"
+                    :placeholder="item.discount_amount.toFixed(2) ? item.discount_amount : 0 "
                     v-model="item.discount_amount"
                 />
             </div>
@@ -102,9 +102,9 @@
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
-                    placeholder="Price List Rate"
                     :disabled="false"
                     label="Price List Rate"
+                    :placeholder="item.price_list_rate.toFixed(2)"
                     v-model="item.price_list_rate"
                 />
             </div>
@@ -272,7 +272,6 @@
         for (let index = 0; index < base.items.length; index++) {
             if (place !== index && base.items[place].item_code === base.items[index].item_code &&
             ((base.items[place].has_batch_no && base.items[index].batch_no === base.items[index].batch_no) || !base.items[place].has_batch_no)) {
-                console.log(base.items[index].item_code,"Item found, merging quantities.");
                 base.items[index].qty += base.items[place].qty;
                 base.items.splice(place, 1);
                 find = true;
@@ -311,14 +310,19 @@
     () => props.item.qty,
     (newvalue,oldValue) => {
         if (newvalue != oldValue || !oldValue) {
-            props.rate = rateCalculation(props.item); // Calculate rate and emit event
-            props.item.amount=props.item.rate*props.item.qty
+            props.item.rate = rateCalculation(props.item);
+            props.item.amount=props.item.rate * props.item.qty
+        }
+    },
+    () => props.item.discount_percentage,
+    (newvalue,oldValue) => {
+        if (newvalue != oldValue || !oldValue) {
+            props.item.rate = rateCalculation(props.item);
+            props.item.amount = props.item.rate * props.item.qty
         }
     }
     );
-    const rateCalculation = (data) => {
-        return data.price_list_rate - ((data.discount_percentage * data.price_list_rate) / 100);;
-    };
+    const rateCalculation = (data) => data.price_list_rate - ((data.discount_percentage * data.price_list_rate) / 100);
 
     // Listen for rateCalculated event and update item rate
     onMounted(() => {

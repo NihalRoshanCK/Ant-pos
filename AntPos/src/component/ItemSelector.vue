@@ -68,7 +68,6 @@ const searchResource = createResource({
         if (data.serial_no) {
             data.selected_serial_no = [data.serial_no];
         }
-        console.log(data, "Search result data");
         if (!addItemIfExists(data)) {
             addItemsResource.fetch({ search_value: JSON.stringify(data) });
         }
@@ -84,7 +83,6 @@ const addItemsResource = createResource({
     method: 'GET',
     debounce: 500,
     initialData: [],
-    auto: false, // Manual fetch
     makeParams(params) {
         return {
             pos_profile: JSON.stringify(base.pos_profile),
@@ -101,18 +99,33 @@ const addItemsResource = createResource({
         console.error('Add items error:', error);
     },
     onSuccess(data) {
-        console.log(data, "Add items data");
-        
         addItem(data);
     },
 });
-
-const priceListResource = createResource({
-    url: 'erpnext.stock.get_item_details.apply_price_list', // API endpoint
-    method: 'POST', // Change to POST as most ERPNext APIs use POST
-    debounce: 500,
+const priceRuleRemover = createResource({
+    url: 'erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rule_for_item', 
+    method: 'POST', 
     auto: false,
     makeParams() {
+        return {
+            pricing_rules: [
+                "PRLE-0003"
+                ],  
+            item_details: {"doctype":"Sales Invoice Item","name":"new-sales-invoice-item-otqwuoxyib","item_code":"SR-MWR-SRT-LINEN-HS","pricing_rules":"[\n \"PRLE-0003\"\n]","parenttype":"Sales Invoice","parent":"new-sales-invoice-qvfaljieei","price_list_rate":0},
+            item_code: SR-MWR-SRT-LINEN-HS,
+            rate: 0
+
+        };
+    },
+    onError(error) {
+    },
+    onSuccess(data) {
+    }
+});
+const priceListResource = createResource({
+    url: 'erpnext.stock.get_item_details.apply_price_list', 
+    method: 'POST', 
+    makeParams(params) {
         return {
             args: JSON.stringify({
                 items: [
@@ -120,35 +133,33 @@ const priceListResource = createResource({
                     "doctype": "Sales Invoice Item",
                     "name": "new-sales-invoice-item-lrdmbgmbcz",
                     "child_docname": "new-sales-invoice-item-lrdmbgmbcz",
-                    "item_code": "SR-MWR-SRT-LINEN-HS",
-                    "item_group": "SURPLUS PRODUCTS",
-                    "brand": null,
-                    "qty": 2,
-                    "stock_qty": 2,
-                    "uom": "Nos",
-                    "stock_uom": "Nos",
+                    "item_code": params.items.item_code,
+                    "item_group":params.items.item_group,
+                    "brand": params.items.brand,
+                    "qty": params.items.qty,
+                    "stock_qty": params.items.stock_qty,
+                    "uom": params.items.uom,
+                    "stock_uom": params.items.stock_uom,
                     "parenttype": "Sales Invoice",
                     "parent": "new-sales-invoice-owspmikswv",
-                    "pricing_rules": [
-                    "PRLE-0003"
-                    ],
-                    "is_free_item": 0,
-                    "warehouse": "MG Road - FITPL",
-                    "serial_no": "3030012506\n3030012508",
-                    "batch_no": "B303001-24010-00010",
-                    "price_list_rate": 1899,
-                    "conversion_factor": 1,
-                    "margin_type": "Percentage",
-                    "margin_rate_or_amount": 0
+                    "pricing_rules": params.items.pricing_rules,
+                    "is_free_item": params.items.is_free_item,
+                    "warehouse": params.items.warehouse,
+                    "serial_no": base.items.selected_serial_no,
+                    "batch_no": params.items.batch_no,
+                    "price_list_rate": params.items.price_list_rate,
+                    "conversion_factor": params.items.conversion_factor,
+                    "margin_type": params.items.margin_type,
+                    "margin_rate_or_amount": params.items.margin_rate_or_amount,
                     }
                 ],
                     "customer":base.customer.name,
                     "customer_group":  base.customer.customer_group,
-                    "territory": "India",
+                    "territory": base.customer.territory,
                     "currency":base.pos_profile.currency,
                     "conversion_rate": 1,
                     "price_list": "Standard Selling",
-                    "price_list_currency": "INR",
+                    "price_list_currency": base.pos_profile.currency,
                     "plc_conversion_rate": 1,
                     "company": base.pos_profile.company,
                     "transaction_date": "",
@@ -157,8 +168,8 @@ const priceListResource = createResource({
                     "name": "new-sales-invoice-owspmikswv",
                     "is_return": 0,
                     "update_stock": 1,
-                    "pos_profile": "FORMOST MG Road",
-                    "is_internal_customer": 0
+                    "pos_profile": base.pos_profile.name,
+                    "is_internal_customer": base.customer.is_internal_customer,
             })
         };
     },
@@ -166,7 +177,8 @@ const priceListResource = createResource({
         console.error('Price list error:', error);
     },
     onSuccess(data) {
-        console.log('Price list data:', data);
+        return data;
+
     }
 });
 
@@ -205,11 +217,25 @@ const addItemIfExists = (data) => {
                 }
                 base.items[index].qty += 1;
                 found = true;
-                base.item
-                // priceListResource.fetch({ items: base.items[index] });
-                console.log("ooooooooooooooooooooooooooooooooo");
+                priceListResource.fetch({ items: base.items[index] })
+                .then(response => {
+                    base.items[index].price_list_rate = response.children[0].price_list_rate
+                    base.items[index].has_margin= response.children[0].has_margin
+                    base.items[index].discount_percentage= response.children[0].discount_percentage
+                    base.items[index].discount_amount = response.children[0].discount_amount 
+                    base.items[index].validate_applied_rule = response.children[0].validate_applied_rule
+                    base.items[index].price_or_product_discount = response.children[0].price_or_product_discount
+                    base.items[index].pricing_rule_for = response.children[0].pricing_rule_for
+                    base.items[index].margin_type = response.children[0].margin_type
+                    base.items[index].margin_rate_or_amount = response.children[0].margin_rate_or_amount
+                    base.items[index].has_pricing_rule = response.children[0].has_pricing_rule
+                    base.items[index].pricing_rules = response.children[0].pricing_rules
+                    base.items[index] = calculateRate(base.items[index]);
+                    
+                })
+                .catch(error => {
+                });
                 
-                priceListResource.fetch({ items: base.items[index] });
 
             }
         });
@@ -219,16 +245,34 @@ const addItemIfExists = (data) => {
 
 // Add new line item
 const addNewLine = (data) => {
+    priceListResource.fetch({ items: data })
+                .then(response => {
+                    data.price_list_rate = response.children[0].price_list_rate
+                    data.has_margin= response.children[0].has_margin
+                    data.discount_percentage= response.children[0].discount_percentage
+                    data.discount_amount = response.children[0].discount_amount 
+                    data.validate_applied_rule = response.children[0].validate_applied_rule
+                    data.price_or_product_discount = response.children[0].price_or_product_discount
+                    data.pricing_rule_for = response.children[0].pricing_rule_for
+                    data.margin_type = response.children[0].margin_type
+                    data.margin_rate_or_amount = response.children[0].margin_rate_or_amount
+                    data.has_pricing_rule = response.children[0].has_pricing_rule
+                    data.pricing_rules = response.children[0].pricing_rules
+                    data = calculateRate(data);
+                    
+                })
+                .catch(error => {
+                });
     base.items.push(data);
 };
 
-// Add child item
 const addChild = (data, value) => {
     data.push(value);
 };
 
-// Calculate rate after discount
 const calculateRate = (data) => {
-    return data.price_list_rate - ((data.discount_percentage * data.price_list_rate) / 100);
-};
+    data.rate =   data.price_list_rate - ((data.discount_percentage * data.price_list_rate) / 100)
+    data.amount= data.rate * data.qty
+    return data;
+    };
 </script>

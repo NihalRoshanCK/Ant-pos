@@ -138,7 +138,6 @@ const createCustomer = () => {
       };
     },
     onSuccess(data) {
-      console.log(data,'Customer Created:'); 
       handleDialogClose();
     },
     onError(err) {
