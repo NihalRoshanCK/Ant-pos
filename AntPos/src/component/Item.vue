@@ -68,7 +68,7 @@
                     variant="subtle"
                     :disabled="false"
                     label="Rate"
-                    :placeholder="item.rate.toFixed(2)"
+                    placeholder="0"
                     v-model="item.rate"
                 />
             </div>
@@ -92,7 +92,7 @@
                     variant="subtle"
                     :disabled="false"
                     label="Discount Amount"
-                    :placeholder="item.discount_amount.toFixed(2) ? item.discount_amount : 0 "
+                    placeholder="0"
                     v-model="item.discount_amount"
                 />
             </div>
@@ -104,7 +104,7 @@
                     variant="subtle"
                     :disabled="false"
                     label="Price List Rate"
-                    :placeholder="item.price_list_rate.toFixed(2)"
+                    placeholder="0"
                     v-model="item.price_list_rate"
                 />
             </div>
@@ -224,8 +224,7 @@
 </template>
 <script setup>
     import {  FeatherIcon, FormControl, Autocomplete } from 'frappe-ui';
-    import { inject, watch, defineProps, computed, onMounted, onBeforeUnmount } from 'vue';
-    import eventBus from '../utils/eventBus'; // import the event bus
+    import { inject, watch, defineProps, computed, onMounted} from 'vue';
 
     let base = inject('base');
 

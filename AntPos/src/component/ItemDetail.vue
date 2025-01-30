@@ -163,7 +163,7 @@
     import Customer from './Customer.vue';
     import { Button, FeatherIcon , FormControl } from 'frappe-ui';
     import { inject } from 'vue';
-    import Item from './item.vue';
+    import Item from './Item.vue';
 
     const { loadComponent } = inject('dynamicComponent');
     let base = inject('base');
