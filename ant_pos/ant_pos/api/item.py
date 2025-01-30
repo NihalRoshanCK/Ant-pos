@@ -1,9 +1,7 @@
 import frappe
 import json
 from frappe import _ 
-from erpnext.stock.get_item_details import get_item_details , get_item_price , apply_price_list
-from erpnext.stock.doctype.batch.batch import get_batch_qty
-from erpnext.accounts.doctype.pricing_rule.pricing_rule import apply_pricing_rule
+from erpnext.stock.get_item_details import get_item_details  
 BarcodeScanResult = dict[str, str | None]
 
 

@@ -99,26 +99,6 @@ const addItemsResource = createResource({
         addItem(data);
     },
 });
-const priceRuleRemover = createResource({
-    url: 'erpnext.accounts.doctype.pricing_rule.pricing_rule.remove_pricing_rule_for_item', 
-    method: 'POST', 
-    auto: false,
-    makeParams() {
-        return {
-            pricing_rules: [
-                "PRLE-0003"
-                ],  
-            item_details: {"doctype":"Sales Invoice Item","name":"new-sales-invoice-item-otqwuoxyib","item_code":"SR-MWR-SRT-LINEN-HS","pricing_rules":"[\n \"PRLE-0003\"\n]","parenttype":"Sales Invoice","parent":"new-sales-invoice-qvfaljieei","price_list_rate":0},
-            item_code: SR-MWR-SRT-LINEN-HS,
-            rate: 0
-
-        };
-    },
-    onError(error) {
-    },
-    onSuccess(data) {
-    }
-});
 const priceListResource = createResource({
     url: 'erpnext.stock.get_item_details.apply_price_list', 
     method: 'POST', 

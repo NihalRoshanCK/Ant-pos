@@ -47,7 +47,7 @@
                     </div>
                 </div>
                 <div v-for="(item, key) in base.items" :key="key" class="flex flex-col justify-between mb-2 ">
-                    <item :item="item" :index="key"  />                   
+                    <Item :item="item" :index="key"  />                   
                 </div>
             </div>
         </div>
@@ -89,9 +89,9 @@
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
-                    placeholder="Placeholder"
+                    placeholder="0"
                     :disabled="false"
-                    label="Label"
+                    label="Total"
                     v-model="inputValue"
                 />
 
@@ -163,7 +163,7 @@
     import Customer from './Customer.vue';
     import { Button, FeatherIcon , FormControl } from 'frappe-ui';
     import { inject } from 'vue';
-    import item from './item.vue';
+    import Item from './item.vue';
 
     const { loadComponent } = inject('dynamicComponent');
     let base = inject('base');
