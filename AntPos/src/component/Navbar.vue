@@ -22,11 +22,10 @@
                     :options="[
                         {
                         label: 'Close Shift',
-                        onClick: () => {
-                                    },
+                        onClick: openCloseShiftDialog,
                         icon: () => h(FeatherIcon, { name: 'file-minus' }),
-                        },
-                        {
+                    },
+                    {
                         label: 'Logout',
                         onClick: () => {
                                     },
@@ -39,10 +38,18 @@
                 />
         </div>
     </div>
+    <CloseShift v-model="showCloseShift" />
 </template>
 
 <script setup>
-    import { h , inject } from 'vue'; 
+    import { h ,ref, inject } from 'vue'; 
+    import CloseShift from './Dialog/CloseShift.vue';
+
+    const showCloseShift = ref(false);
+
+    const openCloseShiftDialog = () => {
+    showCloseShift.value = true;
+    };
 
     const base = inject('base')
 
