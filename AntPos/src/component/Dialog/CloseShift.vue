@@ -65,7 +65,6 @@
     
     </Dialog>
 
-    <Button @click="dialog1 = true">Show Dialog</Button>
 </template>
 
 <script setup>
