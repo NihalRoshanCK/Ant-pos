@@ -345,15 +345,18 @@ watch(
 );
 
 const adjustSerialNumbers = (newQty, oldQty) => {
-    const availableSerials = props.items.serial_no_options.map(option => option.value);
-    if (newQty > oldQty) {
-        // Add serial numbers in ascending order
-        const toAdd = availableSerials.slice(oldQty, newQty);
-        props.items.selected_serial_no.push(...toAdd);
-    } else if (newQty < oldQty) {
-        // Remove serial numbers in descending order
-        props.items.selected_serial_no.splice(newQty);
+    if ( newQty > props.items.selected_serial_no.length) {
+        const diff = newQty - oldQty;
+        for (let i = 0; i < diff; i++) {
+            if (!props.items.selected_serial_no.includes(props.items.serial_no_options[i])){
+                props.items.selected_serial_no.push(props.items.serial_no_options[i].value);
+            }
+        }
+        } else {
+        props.items.selected_serial_no = props.items.selected_serial_no.slice(0, newQty);
+
     }
+    
 };
 
 watch(
