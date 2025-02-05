@@ -348,37 +348,28 @@ watch(
 );
 
 const adjustSerialNumbers = (newQty, oldQty) => {
-    // If the new quantity is greater than the old quantity
-    if (newQty > oldQty) {
-        const availableSerials = props.items.serial_no_options.map(option => option.value);
-        const selectedSerials = props.items.selected_serial_no;
-        const diff = newQty - oldQty;
+    console.log('Adjusting serial numbers');
+    
+    let diff = Math.abs(newQty - oldQty);
 
-        console.log('New qty is greater than old qty');
-        
-        for (let i = 0; i < diff; i++) {
-            // Find the first available serial number that is not already selected
-            const nextSerial = availableSerials.find(serial => !selectedSerials.includes(serial));
-            if (nextSerial) {
-                selectedSerials.push(nextSerial);
-            } else {
-                console.warn('Not enough available serial numbers to match the new quantity');
-                break;
-            }
-        }
+    if (props.items.selected_serial_no.length > newQty) {
+        props.items.selected_serial_no = props.items.serial_no_options
+            .filter((serial_no, index) => index < newQty)
+            .map(serial_no => serial_no.value);
+    } else if (props.items.selected_serial_no.length < newQty) {
+        // Get serial numbers that are not in selected_serial_no
+        let availableSerialNos = props.items.serial_no_options
+            .filter(serial_no => !props.items.selected_serial_no.includes(serial_no.value))
+            .map(serial_no => serial_no.value);
 
-        props.items.selected_serial_no = selectedSerials;
-
-    // If the new quantity is less than the old quantity
-    } else if (newQty < oldQty) {
-        const selectedSerials = props.items.selected_serial_no;
-        const diff = oldQty - newQty;
-
-        selectedSerials.splice(newQty, diff);
-
-        props.items.selected_serial_no = selectedSerials;
+        // Add the required number of serial numbers to selected_serial_no
+        props.items.selected_serial_no = [
+            ...props.items.selected_serial_no,
+            ...availableSerialNos.slice(0, diff)
+        ];
     }
 };
+
 watch(
     () => props.items.discount_percentage,
     (newValue, oldValue) => {
