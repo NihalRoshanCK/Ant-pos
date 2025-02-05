@@ -252,11 +252,14 @@ watch(
     () => props.items.batch_no,
     (newBatchNo, oldBatchNo) => {
         if (newBatchNo && (newBatchNo.value !== oldBatchNo?.value) || !oldBatchNo) {
-            props.items.selected_batch_no = newBatchNo.value;
+            console.log('Batch No changed', newBatchNo);
+            
+            // props.items.selected_batch_no = newBatchNo;
             let find = validateitems(props.index);
             if (!find) {
+                console.log("inside find",props.items.serial_no_options );
                 props.items.selected_serial_no = [];
-                props.items.serial_no_options = props.items.serial_no.filter((serial_no) => props.items.selected_batch_no && serial_no.batch_no === props.items.selected_batch_no)
+                props.items.serial_no_options = props.items.serial_no.filter((serial_no) => props.items.selected_batch_no.value && serial_no.batch_no === props.items.selected_batch_no)
                     .map((serial_no) => ({
                         label: serial_no.serial_no,
                         value: serial_no.serial_no,

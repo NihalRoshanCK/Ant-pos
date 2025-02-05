@@ -128,6 +128,7 @@
                     :disabled="false"
                     :link="null"
                     class="bg-violet-600 text-yellow-50"
+                    @click="post.fetch()"
                 >
                     SAVE/NEW
                 </Button>
@@ -161,7 +162,7 @@
 <script setup>
 
     import Customer from './Customer.vue';
-    import { Button, FeatherIcon , FormControl } from 'frappe-ui';
+    import { Button, FeatherIcon , FormControl , createResource } from 'frappe-ui';
     import { inject,watch } from 'vue';
     import Item from './Item.vue';
 
@@ -169,6 +170,43 @@
     let base = inject('base');
     const emitter = inject('emitter');
     
+    let post = createResource({
+        url: '/api/resource/Sales Invoice',
+        method: 'POST',
+        makeParams() {
+            base.items.forEach((item) => {
+                item.serial_no=item.selected_serial_no.join('\n');
+            });
+            const currentDate = new Date();
+            const formattedDate = currentDate.toISOString().split('T')[0];
+            return {
+                company: base.company,
+                posting_date:formattedDate,
+                currency:base.pos_profile.currency,
+                conversion_rate:1,
+                selling_price_list:'Standard Selling',
+                price_list_currency:base.pos_profile.currency,
+                plc_conversion_rate:1,
+                items:base.items,
+                base_net_total:base.total,
+                base_grand_total:base.total,
+                grand_total:base.total,
+                debit_to:'Debtors - FITPL',
+                due_date:formattedDate,
+                customer:base.customer,
+            }
+        }
+    });
+
+    watch(
+        () => base.items,
+        (newSerial, oldSerial) => {
+            if (newSerial!==oldSerial) {
+                emitter.emit('calctotal');
+            }
+        }
+    );
+
     watch(
         () => base.additional_discount,
         (newSerial, oldSerial) => {

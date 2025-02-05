@@ -107,6 +107,9 @@ const priceListResource = createResource({
     method: 'POST',
     makeParams(params) {
         lastParams = params;
+        if(params.items.batch_no?.value) {
+            params.items.batch_no = params.items.batch_no.value;
+        }
         return {
             args: JSON.stringify({
                 items: [
