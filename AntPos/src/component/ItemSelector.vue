@@ -194,6 +194,7 @@ const addItem = (data) => {
                     label: serial_no.serial_no,
                     value: serial_no.serial_no,
                 }));
+            data.use_serial_batch_fields=1;
         }
         addNewLine(data);
     }

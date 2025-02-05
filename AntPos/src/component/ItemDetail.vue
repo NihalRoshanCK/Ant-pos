@@ -194,6 +194,7 @@
                 debit_to:'Debtors - FITPL',
                 due_date:formattedDate,
                 customer:base.customer,
+                update_stock :1
             }
         }
     });
