@@ -348,20 +348,37 @@ watch(
 );
 
 const adjustSerialNumbers = (newQty, oldQty) => {
-    if ( newQty > props.items.selected_serial_no.length) {
+    // If the new quantity is greater than the old quantity
+    if (newQty > oldQty) {
+        const availableSerials = props.items.serial_no_options.map(option => option.value);
+        const selectedSerials = props.items.selected_serial_no;
         const diff = newQty - oldQty;
+
+        console.log('New qty is greater than old qty');
+        
         for (let i = 0; i < diff; i++) {
-            if (!props.items.selected_serial_no.includes(props.items.serial_no_options[i])){
-                props.items.selected_serial_no.push(props.items.serial_no_options[i].value);
+            // Find the first available serial number that is not already selected
+            const nextSerial = availableSerials.find(serial => !selectedSerials.includes(serial));
+            if (nextSerial) {
+                selectedSerials.push(nextSerial);
+            } else {
+                console.warn('Not enough available serial numbers to match the new quantity');
+                break;
             }
         }
-        } else {
-        props.items.selected_serial_no = props.items.selected_serial_no.slice(0, newQty);
 
+        props.items.selected_serial_no = selectedSerials;
+
+    // If the new quantity is less than the old quantity
+    } else if (newQty < oldQty) {
+        const selectedSerials = props.items.selected_serial_no;
+        const diff = oldQty - newQty;
+
+        selectedSerials.splice(newQty, diff);
+
+        props.items.selected_serial_no = selectedSerials;
     }
-    
 };
-
 watch(
     () => props.items.discount_percentage,
     (newValue, oldValue) => {
