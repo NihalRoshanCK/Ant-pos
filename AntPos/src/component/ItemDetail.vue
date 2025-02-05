@@ -47,7 +47,7 @@
                     </div>
                 </div>
                 <div v-for="(item, key) in base.items" :key="key" class="flex flex-col justify-between mb-2 ">
-                    <Item :item="item" :index="key"  />                   
+                    <Item :items="item" :index="key"  />                   
                 </div>
             </div>
         </div>
@@ -62,7 +62,7 @@
                     placeholder="0"
                     :disabled="false"
                     label="Total Qty"
-                    v-model="inputValue"
+                    v-model="base.total_qty"
                 />
                 <FormControl
                     :type="'number'"
@@ -72,7 +72,7 @@
                     placeholder="0"
                     :disabled="false"
                     label="Additional Discount"
-                    v-model="inputValue"
+                    v-model="base.additional_discount"
                 />
                 <FormControl
                     :type="'number'"
@@ -82,7 +82,7 @@
                     placeholder="0"
                     :disabled="false"
                     label="Item Discount"
-                    v-model="inputValue"
+                    v-model="base.item_discount"
                 />
                 <FormControl
                     :type="'number'"
@@ -92,7 +92,7 @@
                     placeholder="0"
                     :disabled="false"
                     label="Total"
-                    v-model="inputValue"
+                    v-model="base.total"
                 />
 
             </div>
@@ -162,9 +162,19 @@
 
     import Customer from './Customer.vue';
     import { Button, FeatherIcon , FormControl } from 'frappe-ui';
-    import { inject } from 'vue';
+    import { inject,watch } from 'vue';
     import Item from './Item.vue';
 
     const { loadComponent } = inject('dynamicComponent');
     let base = inject('base');
+    const emitter = inject('emitter');
+    
+    watch(
+        () => base.additional_discount,
+        (newSerial, oldSerial) => {
+            if (newSerial!==oldSerial) {
+                emitter.emit('calctotal');
+            }
+        }
+    );
 </script>

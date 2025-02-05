@@ -14,7 +14,7 @@
 import { ref, computed, inject, watch, nextTick, onMounted } from 'vue';
 import Autocomplete from './custom_components/Autocomplete.vue';
 import { createListResource } from 'frappe-ui';
-import eventBus from '/src/utils/eventBus.js'; // Correct import statement
+import emitter from '/src/utils/emitter.js'; // Correct import statement
 
 const selected_customer = ref('');
 const autocompleteRef = ref(null);
@@ -69,7 +69,7 @@ watch(
 
 // Listen to the event to refetch data and set the selected customer
 onMounted(() => {
-  eventBus.on('customer-created', (customerData) => {
+  emitter.on('customer-created', (customerData) => {
     customerResource.fetch().then(() => {
       selected_customer.value = {
         label: customerData.name,

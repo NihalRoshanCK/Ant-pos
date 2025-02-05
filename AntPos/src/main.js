@@ -3,6 +3,7 @@ import './index.css'
 import { createApp, reactive } from 'vue'
 import router from './router'
 import App from './App.vue'
+import mitt from 'mitt';
 
 import {
   Button,
@@ -14,6 +15,9 @@ import {
 } from 'frappe-ui'
 
 const app = createApp(App)
+
+// Create event bus
+const emitter = mitt();
 
 setConfig('resourceFetcher', frappeRequest)
 
@@ -30,5 +34,8 @@ const base = reactive({
   items:[]
 })
 app.provide('base', base) // 'base' is the key for injection
+
+// Provide emitter it globally
+app.provide('emitter', emitter);
 
 app.mount('#app')
