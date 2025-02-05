@@ -180,6 +180,8 @@
             const currentDate = new Date();
             const formattedDate = currentDate.toISOString().split('T')[0];
             return {
+                is_pos:1,
+                pos_profile:base.pos_profile.name,
                 company: base.company,
                 posting_date:formattedDate,
                 currency:base.pos_profile.currency,
