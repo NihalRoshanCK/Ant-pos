@@ -7,7 +7,8 @@
         <Navbar />
       </div>
       <div class="w-screen h-[94%] flex p-2 gap-4">
-        <ItemSelector/>
+        <ItemSelector v-if="base.status=='' " />
+        <Invoice v-if="base.status=='invoice'"/>
         <ItemDetail/>
       </div>
     </div>
@@ -21,6 +22,7 @@
     import { FeatherIcon, Autocomplete, createListResource ,Button } from 'frappe-ui';
     import { computed, inject, provide , watch,  } from 'vue';
     import { useDynamicComponent } from '../utils/Dialog';
+  import Invoice from '../component/Invoice.vue';
 
     let base = inject('base');
     const { currentComponent, loadComponent } = useDynamicComponent();

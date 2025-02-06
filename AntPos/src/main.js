@@ -13,6 +13,7 @@ import {
   frappeRequest,
   resourcesPlugin,
 } from 'frappe-ui'
+import Invoice from './component/Invoice.vue';
 
 const app = createApp(App)
 
@@ -31,7 +32,9 @@ app.component('Input', Input)
 // Create a reactive base object and provide it
 const base = reactive({
   Ant_Opening_Shift:{},
-  items:[]
+  items:[],
+  status:'',
+  invoice:{},
 })
 app.provide('base', base) // 'base' is the key for injection
 
