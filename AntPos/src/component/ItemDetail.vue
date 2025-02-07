@@ -213,7 +213,9 @@
             
             if ( status == 'pay'){
                 base.status = 'invoice';
-                console.log(data);
+                console.log(post.data,"invoice");
+                
+                base.invoice = post.data
                 
             }  
 

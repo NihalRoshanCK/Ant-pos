@@ -302,9 +302,11 @@ const calculateQtyTotal = () => {
     let total = 0;
 
     base.items.forEach((element) => {
-        total += element.qty || 0;
+        total += parseFloat(element.qty) || 0;
     });
-    base.total_qty = total.toFixed ? total.toFixed(2) : '0.00';
+
+
+    base.total_qty = total.toFixed(2);
 };
 
 const validateQty = (qty) => {
@@ -348,8 +350,6 @@ watch(
 );
 
 const adjustSerialNumbers = (newQty, oldQty) => {
-    console.log('Adjusting serial numbers');
-    
     let diff = Math.abs(newQty - oldQty);
 
     if (props.items.selected_serial_no.length > newQty) {
@@ -374,9 +374,8 @@ watch(
     () => props.items.discount_percentage,
     (newValue, oldValue) => {
         if (newValue !== oldValue || !oldValue) {
-            
             props.items.rate = rateCalculation(props.items);
-            props.items.amount = props.items.rate * props.items.qty;        
+            props.items.amount = props.items.rate* props.items.qty;        
         }
     }
 );

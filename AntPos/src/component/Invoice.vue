@@ -3,31 +3,29 @@
         <div class="h-[85%]  w-full ">
             <div class=" grid grid-cols-2 gap-4 p-2">
                 <FormControl
-                    :type="'search'"
+                    :type="'number'"
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
                     placeholder="Placeholder"
-                    :disabled="false"
-                    label="Label"
-                    v-model="inputValue"
+                    :disabled="true"
+                    label="Amount Paid"
+                    v-model="base.invoice.paid_amount" 
                 />
                 <FormControl
-                    :type="'search'"
+                    :type="'number'"
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
                     placeholder="Placeholder"
-                    :disabled="false"
-                    label="Label"
-                    v-model="inputValue"
+                    :disabled="true"
+                    label="To Be Paid"
+                    v-model="base.invoice.total"
                 />
-
             </div>
-            
             <div class=" grid grid-cols-2 gap-4 p-2 items-center" v-for="mode in base.pos_profile.payments">
                     <FormControl
-                    :type="'search'"
+                    :type="'number'"
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
@@ -50,68 +48,67 @@
                     >
                         {{mode.mode_of_payment}}
                     </Button>
-
             </div>
             <div class=" grid grid-cols-2 gap-4 p-2">
                 <FormControl
-                    :type="'search'"
+                    :type="'number'"
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
                     placeholder="0"
                     :disabled="false"
                     label="Net Total"
-                    v-model="inputValue"
+                    v-model="base.invoice.net_total"
                 />
                 <FormControl
-                    :type="'search'"
+                    :type="'number'"
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
                     placeholder="0"
                     :disabled="false"
                     label="Tax and Charges"
-                    v-model="inputValue"
+                    v-model="base.invoice.total_taxes_and_charges"
                 />
                 <FormControl
-                    :type="'search'"
+                    :type="'number'"
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
                     placeholder="0"
                     :disabled="false"
                     label="Total Amount"
-                    v-model="inputValue"
+                    v-model="base.invoice.total"
                 />
                 <FormControl
-                    :type="'search'"
+                    :type="'number'"
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
                     placeholder="0"
                     :disabled="false"
                     label="Discount Amount"
-                    v-model="inputValue"
+                    v-model="base.invoice.discount_amount"
                 />
                 <FormControl
-                    :type="'search'"
+                    :type="'number'"
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
                     placeholder="0"
                     :disabled="false"
                     label="Grand Total"
-                    v-model="inputValue"
+                    v-model="base.invoice.grand_total"
                 />
                 <FormControl
-                    :type="'search'"
+                    :type="'number'"
                     :ref_for="true"
                     size="sm"
                     variant="subtle"
                     placeholder="0"
                     :disabled="false"
                     label="Rounded Total"
-                    v-model="inputValue"
+                    v-model="base.invoice.rounded_total"
                 />
             </div>
         </div>
@@ -168,8 +165,22 @@
     </div>
 </template>
 <script setup>
-    import { Button, FeatherIcon , FormControl , createResource } from 'frappe-ui';
-    import { inject,watch } from 'vue';
+    import { Button , FormControl , createResource } from 'frappe-ui';
+    import { inject,watch ,onMounted} from 'vue';
     let base = inject('base');
+    const addPayments = () => {
+    base.pos_profile.payments.forEach(element => {
+        base.invoice.payments.push({
+            "mode_of_payment": element.mode_of_payment,
+            "amount": 0,
+            "base_amount": 0
+        });
+        
+        
+    });
+};
 
+    onMounted(() => {
+        addPayments()
+    });
 </script>
