@@ -10,7 +10,7 @@
                     placeholder="Placeholder"
                     :disabled="true"
                     label="Amount Paid"
-                    v-model="base.invoice.paid_amount" 
+                    v-model="base.invoice.rounded_total" 
                 />
                 <FormControl
                     :type="'number'"
@@ -20,21 +20,21 @@
                     placeholder="Placeholder"
                     :disabled="true"
                     label="To Be Paid"
-                    v-model="base.invoice.total"
+                    v-model="base.invoice.rounded_total"
                 />
             </div>
-            <div class=" grid grid-cols-2 gap-4 p-2 items-center" v-for="mode in base.pos_profile.payments">
-                    <FormControl
-                    :type="'number'"
-                    :ref_for="true"
+            <div class=" grid grid-cols-2 gap-4 p-2 items-center" v-for=" ( mode , index) in base.pos_profile.payments">
+                <FormControl
+                    v-if="base.invoice?.payments && base.invoice.payments[index]"
+                    type="number"
                     size="sm"
                     variant="subtle"
                     placeholder="0"
                     :disabled="false"
                     :label="mode.mode_of_payment"
-                    v-model="inputValue"
+                    v-model="base.invoice.payments[index].amount"
                 />
-                <Button
+                    <Button
                         class="w-full h-full"
                         :variant="'solid'"
                         :ref_for="true"
@@ -45,6 +45,7 @@
                         :loadingText="null"
                         :disabled="false"
                         :link="null"
+                        @click="changemode(index)"
                     >
                         {{mode.mode_of_payment}}
                     </Button>
@@ -126,8 +127,9 @@
                         :loadingText="null"
                         :disabled="false"
                         :link="null"
+                        @click="test"
                     >
-                        Button
+                        Submit
                     </Button>
                     <Button
                         class="w-1/2 h-full"
@@ -141,7 +143,7 @@
                         :disabled="false"
                         :link="null"
                     >
-                        Button
+                        Submit & Print
                     </Button>
                 </div>
             </div>
@@ -158,29 +160,55 @@
                     :disabled="false"
                     :link="null"
                 >
-                    Button
+                    Cancel
                 </Button>
             </div>
         </div>
     </div>
 </template>
 <script setup>
-    import { Button , FormControl , createResource } from 'frappe-ui';
-    import { inject,watch ,onMounted} from 'vue';
+    import { Button , FormControl ,createResource  ,createDocumentResource } from 'frappe-ui';
+    import { inject , onMounted, watchEffect } from 'vue';
     let base = inject('base');
     const addPayments = () => {
-    base.pos_profile.payments.forEach(element => {
-        base.invoice.payments.push({
-            "mode_of_payment": element.mode_of_payment,
-            "amount": 0,
-            "base_amount": 0
+        base.pos_profile.payments.forEach(element => {
+            if (!base.invoice.payments.some(payment => payment.mode_of_payment === element.mode_of_payment)) {
+                base.invoice.payments.push({
+                    "mode_of_payment": element.mode_of_payment,
+                    "amount": element.default ? base.invoice.base_rounded_total : 0.00,
+                    "base_amount": 0.00
+                });
+            }
         });
-        
-        
-    });
-};
-
+    };
+    const changemode = (index) => {
+    base.invoice.payments[index].amount = 
+        base.invoice.payments[index].amount === base.invoice.base_rounded_total ? 0 : base.invoice.base_rounded_total;
+    };
     onMounted(() => {
         addPayments()
     });
+    let post = createDocumentResource({
+        doctype: 'Sales Invoice',
+        name: base.invoice.name,
+    })
+    let test1 = createResource({
+        url: 'ant_pos.ant_pos.api.item.submitDoc',
+        method: 'POST',
+        makeParams() {
+            return {
+                doc:'Sales Invoice',
+                name:base.invoice.name
+            };
+        },
+    });
+    const test=()=>{
+        console.log(base.invoice);
+        post.setValue.submit({
+            payments: base.invoice.payments,
+            base_write_off_amount:0.00
+        }) 
+        // post.submit()
+        test1.fetch()
+    }
 </script>

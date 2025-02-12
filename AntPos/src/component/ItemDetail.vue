@@ -60,7 +60,7 @@
                     size="sm"
                     variant="subtle"
                     placeholder="0"
-                    :disabled="false"
+                    :disabled="true"
                     label="Total Qty"
                     v-model="base.total_qty"
                 />
@@ -80,7 +80,7 @@
                     size="sm"
                     variant="subtle"
                     placeholder="0"
-                    :disabled="false"
+                    :disabled="true"
                     label="Item Discount"
                     v-model="base.item_discount"
                 />
@@ -90,7 +90,7 @@
                     size="sm"
                     variant="subtle"
                     placeholder="0"
-                    :disabled="false"
+                    :disabled="true"
                     label="Total"
                     v-model="base.total"
                 />
@@ -175,7 +175,6 @@
     
     let post = createResource({
         url: 'frappe.client.insert',
-        // method: 'POST',
         makeParams(params) {
             base.items.forEach((item) => {
                 item.serial_no=item.selected_serial_no.join('\n');
@@ -208,9 +207,7 @@
                 }
             };
         },
-        onSuccess(data) { 
-            // console.log(post.data,post.previousData,post.params,post.promise ,"llll");
-            
+        onSuccess(data) {             
             if ( status == 'pay'){
                 base.status = 'invoice';
                 console.log(post.data,"invoice");

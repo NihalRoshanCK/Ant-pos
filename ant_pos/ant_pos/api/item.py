@@ -111,7 +111,6 @@ def items(pos_profile, search_value, customer):
         "barcode": search_values.barcode,
         "customer": customer,
         "currency": company.default_currency,
-        # "is_internal_customer": customer_doc.is_internal_customer,
         "price_list": "Standard Selling",
         "price_list_currency": company.default_currency,
         "company": company.name,
@@ -135,3 +134,24 @@ def items(pos_profile, search_value, customer):
     values["selected_batch_no"] = batch_nos if item['has_batch_no'] and batch_nos else None
 
     return values
+
+@frappe.whitelist()
+def submitDoc(doc, name):
+    print(doc, "docccccccccccccccccccccc", name, "nameeeeeeeeeeeee")
+
+    # Fetch and reload the latest document from the database
+    document = frappe.get_doc(doc, name)
+    document.reload()  # Ensure it has the latest data
+
+    try:
+        frappe.flags.ignore_permissions = True  # Temporarily ignore permissions
+        document.flags.ignore_version = True  # Ignore timestamp mismatch errors
+        document.submit()  # Submit the document
+        frappe.db.commit()  # Ensure changes are committed
+    except frappe.exceptions.TimestampMismatchError:
+        frappe.db.rollback()  # Prevent partial changes
+        frappe.throw("The document was modified by another user. Please refresh and try again.")
+    finally:
+        frappe.flags.ignore_permissions = False  # Reset flag
+
+    return "Document submitted successfully"
